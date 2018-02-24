@@ -1,0 +1,38 @@
+Insert into Achievement Table
+		-('a trip to the movies','2015-09-09','200','1','1','2','1')
+		
+Insert into EmployeeLogin Table:
+		-INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('bondja','password','2016-09-09','Admin','2017-09-09')
+		
+Insert into Administrator Table:
+		-INSERT INTO [dbo].[Administrator] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[EmpLoginID]) VALUES ('James','Bond','jbond007@gmail.com','John Doe','2018-09-09','1')
+		
+Insert into Applaud Table:
+		-INSERT INTO [dbo].[Applaud] ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Bravo','Admin','2012-09-09')
+
+Insert into Department Table:
+		-INSERT INTO [dbo].[Department] [Name],[Description],[NumberOfEmployees],[LastUpdatedBy],[LastUpdated]) VALUES ('Trucking','Truck Drivers','10','Admin','2012-09-09')
+
+Insert into Employee Table:
+		-INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[EmpLoginID],[Points],[Enabled]) VALUES ('James','Bond','bondjs007@gmail.com','Admin','2012-09-09','1','500','1')
+		
+Insert into FeedInformation:
+		-INSERT INTO [dbo].[FeedInformation] ([PostTime],[NumOfLikes],[AchievementID],[TransactionID]) VALUES ('2012-09-09','34','1','1')
+		
+Insert into Image Table:
+		-INSERT INTO [dbo].[Image] ([EmployeeID],[RewardID],[ImageURL]) VALUES ('1','1','http://www.jmu.edu/identity/graphic-style/_images/JMU-logo-rgb-small.jpg')
+
+Insert into RewardCategory Table:
+		-INSERT INTO [dbo].[RewardCategory] ([Description],[QuantityBought],[TotalSales],[LastUpdatedBy],[LastUpdated]) VALUES ('Outdoorsy','100','50','Admin','2012-09-09')
+		
+Insert into RewardProvider Table:
+		-INSERT INTO [dbo].[RewardProvider] ([ProviderName],[ContactFirstName],[ContactLastName],[ContactPhoneNum],[ContactEmail],[LastUpdatedBy],[LastUpdated]) VALUES ('Jack Browns','Jack','Brown','703-123-4556','jblivin@gmail.com','Admin','2012-09-09')
+
+Insert into RewardItem:
+		-INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Giftcard','$25 giftcard','20','2017-09-09','2018-09-09','12','Admin','2017-09-09','1','1')
+		   
+Insert into Transaction Table:
+		-INSERT INTO [dbo].[Transaction] ([Cost],[PurchaseTime],[EmployeeID],[RewardID]) VALUES ('15','2012-09-09','1','1')
+		   
+Insert into Value Table:
+		-INSERT INTO [dbo].[Value] ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Values','admin','2012-09-09')
