@@ -1,0 +1,213 @@
+CREATE TABLE [dbo].[Value](
+	[ValueID] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [varchar](50) NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	CONSTRAINT PK_Value PRIMARY KEY (ValueID)); 
+
+CREATE TABLE [dbo].[EmployeeLogin](
+	[EmpLoginID] [int] IDENTITY(1,1) NOT NULL,
+	[UserName] [varchar](50) NOT NULL,
+	[PasswordHash] [nvarchar](128) NOT NULL,
+	[LastLogin] [datetime] NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	CONSTRAINT [PK_EmployeeLogin] PRIMARY KEY (EmpLoginID));
+
+CREATE TABLE [dbo].[Employee](
+	EmployeeID int IDENTITY(1,1)NOT NULL,
+	FirstName varchar(50) NOT NULL,
+	LastName varchar(50) NOT NULL,
+	Email varchar(50) NOT NULL,
+	LastUpdatedBy varchar(50) NOT NULL,
+	LastUpdated date NOT NULL,
+	Points money NOT NULL,
+	Enabled bit NOT NULL,
+	[EmpLoginID] [int] NOT NULL,
+	CONSTRAINT PK_Employee PRIMARY KEY (EmployeeID),
+	CONSTRAINT FK_EmployeeLogin FOREIGN KEY (EmpLoginID) references EmployeeLogin);
+
+CREATE TABLE [dbo].[RewardProvider](
+	[ProviderID] [int] IDENTITY(1,1) NOT NULL,
+	[ProviderName] [varchar](50) NOT NULL,
+	[ContactFirstName] [varchar](50) NOT NULL,
+	[ContactLastName] [varchar](50) NOT NULL,
+	[ContactPhoneNum] [varchar](50) NOT NULL,
+	[ContactEmail] [varchar](50) NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	CONSTRAINT PK_RewardProvider PRIMARY KEY (ProviderID));
+
+CREATE TABLE [dbo].[Applaud](
+	[ApplaudID] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [varchar](50) NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	CONSTRAINT PK_RewardProvider PRIMARY KEY (ApplaudID));
+
+CREATE TABLE [dbo].[RewardCategory](
+	[CategoryID] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [varchar](50) NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	CONSTRAINT PK_RewardCategory PRIMARY KEY (CategoryID));
+
+CREATE TABLE [dbo].[RewardItem](
+	[RewardID] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [varchar](50) NOT NULL,
+	[Description] [varchar](50) NOT NULL,
+	[Price] [money] NOT NULL,
+	[StartDate] [datetime] NOT NULL,
+	[EndDate] [datetime] NULL,
+	[Quantity] [int] NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	[ProviderID] [int] NOT NULL,
+	[CategoryID] [int] NOT NULL,
+	CONSTRAINT PK_RewardItem PRIMARY KEY (RewardID),
+	CONSTRAINT FK_RewardItemProvider FOREIGN KEY (ProviderID) references RewardProvider,
+	CONSTRAINT FK_RewardItemCategory FOREIGN KEY (CategoryID) references RewardCategory);
+
+
+CREATE TABLE [dbo].[EmployeeLogin](
+	[EmpLoginID] [int] IDENTITY(1,1) NOT NULL,
+	[UserName] [varchar](50) NOT NULL,
+	[PasswordHash] [nvarchar](128) NOT NULL,
+	[LastLogin] [datetime] NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	CONSTRAINT [PK_EmployeeLogin] PRIMARY KEY (EmpLoginID));
+
+CREATE TABLE [dbo].[Employee](
+	EmployeeID int IDENTITY(1,1)NOT NULL,
+	FirstName varchar(50) NOT NULL,
+	LastName varchar(50) NOT NULL,
+	MI char(1),
+	Email varchar(50) NOT NULL,
+	Street Varchar(20) NOT NULL,
+	CityCounty Varchar(25) NOT NULL,
+	StateAbb Char(2) NULL,
+	CountryAbb Char(2) NOT NULL,
+	Zip Char(5) NOT NULL,
+	DateOfBirth date NOT NULL,
+	HireDate date NOT NULL,
+	TerminationDate date NULL,
+	LastUpdatedBy varchar(50) NOT NULL,
+	LastUpdated date NOT NULL,
+	CONSTRAINT PK_Employee PRIMARY KEY (EmployeeID));
+
+CREATE TABLE [dbo].[RewardProviderLogin](
+	[ProviderLoginID] [int] IDENTITY(1,1) NOT NULL,
+	[UserName] [varchar](50) NOT NULL,
+	[PasswordHash] [varchar](50) NOT NULL,
+	[LastLogin] [datetime] NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	CONSTRAINT PK_RewardProviderLogin PRIMARY KEY (ProviderLoginID));
+
+ 
+CREATE TABLE [dbo].[RewardProvider](
+	[ProviderID] [int] IDENTITY(1,1) NOT NULL,
+	[ProviderName] [varchar](50) NOT NULL,
+	[ContactFirstName] [varchar](50) NOT NULL,
+	[ContactLastName] [varchar](50) NOT NULL,
+	[ContactPhoneNum] [varchar](50) NOT NULL,
+	[ContactEmail] [varchar](50) NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	[ProviderLoginID] [int] NOT NULL,
+	CONSTRAINT PK_RewardProvider PRIMARY KEY (ProviderID),
+	CONSTRAINT FK_RewardProviderLogin FOREIGN KEY (ProviderLoginID) references RewardProviderLogin);
+
+CREATE TABLE [dbo].[RewardCategory](
+	[CategoryID] [int] IDENTITY(1,1) NOT NULL,
+	[Description] [varchar](50) NOT NULL,
+	[QuantityBought] [int] NOT NULL,
+	[TotalSales] [money] NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	CONSTRAINT PK_RewardCategory PRIMARY KEY (CategoryID));
+
+CREATE TABLE [dbo].[RewardItem](
+	[RewardID] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [varchar](50) NOT NULL,
+	[Description] [varchar](50) NOT NULL,
+	[Price] [money] NOT NULL,
+	[StartDate] [datetime] NOT NULL,
+	[EndDate] [datetime] NULL,
+	[Quantity] [int] NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	[ProviderID] [int] NOT NULL,
+	[CategoryID] [int] NOT NULL,
+	CONSTRAINT PK_RewardItem PRIMARY KEY (RewardID),
+	CONSTRAINT FK_RewardItemProvider FOREIGN KEY (ProviderID) references RewardProvider,
+	CONSTRAINT FK_RewardItemCategory FOREIGN KEY (CategoryID) references RewardCategory);
+
+CREATE TABLE [dbo].[Image](
+	[ImageID] [int] IDENTITY(1,1) NOT NULL,
+	[ImageFile] [image] NOT NULL,
+	[EmployeeID] [int] NOT NULL,
+	[RewardID] [int] NOT NULL,
+	CONSTRAINT PK_IMAGE PRIMARY KEY (ImageID),
+	CONSTRAINT FK_IMAGEEmployee FOREIGN KEY (EmployeeID) references Employee,
+	CONSTRAINT FK_IMAGEReward FOREIGN KEY (RewardID) references RewardItem);
+
+CREATE TABLE [dbo].[Administrator](
+	AdminID int IDENTITY(1,1) NOT NULL,
+	FirstName varchar(50) NOT NULL,
+	LastName varchar(50) NOT NULL,
+	Email varchar(50) NOT NULL,
+	LastUpdatedBy varchar(50) NOT NULL,
+	LastUpdated date NOT NULL,
+	EmpLoginID int NOT NULL,
+	CONSTRAINT PK_Administrator PRIMARY KEY (AdminID),
+	CONSTRAINT FK_AdministratorLogin FOREIGN KEY (EmpLoginID) references EmployeeLogin);
+
+CREATE TABLE [dbo].[Transaction](
+	[TransactionID] [int] IDENTITY(1,1) NOT NULL,
+	[Cost] [money] NOT NULL,
+	[PurchaseTime] [datetime] NOT NULL,
+	[EmployeeID] [int] NOT NULL,
+	[RewardID] [int] NOT NULL,
+	CONSTRAINT PK_Transaction PRIMARY KEY (TransactionID),
+	CONSTRAINT FK_TransactionEmployee FOREIGN KEY (EmployeeID) references Employee,
+	CONSTRAINT FK_TransactionReward FOREIGN KEY (RewardID) references RewardItem);
+
+CREATE TABLE [dbo].[Image](
+	[ImageID] [int] IDENTITY(1,1) NOT NULL,
+	[ImageFile] [image] NOT NULL,
+	[EmployeeID] [int] NOT NULL,
+	[RewardID] [int] NOT NULL,
+	CONSTRAINT PK_IMAGE PRIMARY KEY (ImageID),
+	CONSTRAINT FK_IMAGEEmployee FOREIGN KEY (EmployeeID) references Employee,
+	CONSTRAINT FK_IMAGEReward FOREIGN KEY (RewardID) references RewardItem);
+
+CREATE TABLE [dbo].[Achievement](
+	[AchievementID] [int] IDENTITY(1,1) NOT NULL,
+	[Description] [varchar](50) NOT NULL,
+	[Date] [datetime] NOT NULL,
+	[PointsAmount] [int] NOT NULL,
+	[EmployeeID] [int] NOT NULL,
+	[ValueID] [int] NOT NULL,
+	[RecEmployee] [int] NOT NULL,
+	[ApplaudID] [int] NOT NULL,
+	CONSTRAINT PK_Achievement PRIMARY KEY (AchievementID),
+	CONSTRAINT FK_AchievementEmployee FOREIGN KEY (EmployeeID) references Employee,
+	CONSTRAINT FK_AchievementValue FOREIGN KEY (ValueID) references [dbo].[Value],
+	CONSTRAINT FK_AchievementRecEmployee FOREIGN KEY (RecEmployee) references [dbo].[Employee],
+	CONSTRAINT FK_AchievementApplaud FOREIGN KEY (ApplaudID) references Applaud);
+
+CREATE TABLE [dbo].[FeedInformation](
+	[PostID] [int] IDENTITY(1,1) NOT NULL,
+	[PostTime] [datetime] NOT NULL,
+	[NumOfLikes] [int] NOT NULL,
+	[AchievementID] [int] NULL,
+	[TransactionID] [int] NULL,
+	CONSTRAINT PK_FeedInformation PRIMARY KEY (PostID),
+	CONSTRAINT FK_FeedInformationEmployee FOREIGN KEY (TransactionID) references [dbo].[Transaction],
+	CONSTRAINT FK_FeedInformationAchievement FOREIGN KEY (AchievementID) references Achievement);
+
+
+
+	
