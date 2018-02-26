@@ -1,0 +1,371 @@
+CREATE TABLE [dbo].[EmployeeLogin](
+	[EmpLoginID] [int] IDENTITY(1,1) NOT NULL,
+	[UserName] [varchar](50) NOT NULL,
+	[PasswordHash] [nvarchar](128) NOT NULL,
+	[LastLogin] [datetime] NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	CONSTRAINT [PK_EmployeeLogin] PRIMARY KEY (EmpLoginID));
+
+CREATE TABLE [dbo].[Employee](
+	EmployeeID int IDENTITY(1,1)NOT NULL,
+	FirstName varchar(50) NOT NULL,
+	LastName varchar(50) NOT NULL,
+	Email varchar(50) NOT NULL,
+	LastUpdatedBy varchar(50) NOT NULL,
+	LastUpdated date NOT NULL,
+	[EmpLoginID] [int] NOT NULL,
+	Points money NOT NULL,
+	Enabled bit NOT NULL,
+	CONSTRAINT PK_Employee PRIMARY KEY (EmployeeID),
+	CONSTRAINT FK_EmployeeLogin FOREIGN KEY (EmpLoginID) references EmployeeLogin);
+
+CREATE TABLE [dbo].[Administrator](
+	AdminID int IDENTITY(1,1) NOT NULL,
+	FirstName varchar(50) NOT NULL,
+	LastName varchar(50) NOT NULL,
+	Email varchar(50) NOT NULL,
+	LastUpdatedBy varchar(50) NOT NULL,
+	LastUpdated date NOT NULL,
+	EmpLoginID int NOT NULL,
+	CONSTRAINT PK_Administrator PRIMARY KEY (AdminID),
+	CONSTRAINT FK_AdministratorLogin FOREIGN KEY (EmpLoginID) references EmployeeLogin);
+
+CREATE TABLE [dbo].[Value](
+	[ValueID] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [varchar](50) NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	CONSTRAINT PK_Value PRIMARY KEY (ValueID)); 
+
+CREATE TABLE [dbo].[Applaud](
+	[ApplaudID] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [varchar](50) NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	CONSTRAINT PK_ApplaudID PRIMARY KEY (ApplaudID));
+
+CREATE TABLE [dbo].[Achievement](
+	[AchievementID] [int] IDENTITY(1,1) NOT NULL,
+	[Description] [varchar](50) NOT NULL,
+	[Date] [datetime] NOT NULL,
+	[PointsAmount] [int] NOT NULL,
+	[EmployeeID] [int] NOT NULL,
+	[ValueID] [int] NOT NULL,
+	[RecEmployee] [int] NOT NULL,
+	[ApplaudID] [int] NOT NULL,
+	CONSTRAINT PK_Achievement PRIMARY KEY (AchievementID),
+	CONSTRAINT FK_AchievementEmployee FOREIGN KEY (EmployeeID) references Employee,
+	CONSTRAINT FK_AchievementValue FOREIGN KEY (ValueID) references [dbo].[Value],
+	CONSTRAINT FK_AchievementRecEmployee FOREIGN KEY (RecEmployee) references [dbo].[Employee],
+	CONSTRAINT FK_AchievementApplaud FOREIGN KEY (ApplaudID) references Applaud);
+
+
+CREATE TABLE [dbo].[RewardProvider](
+	[ProviderID] [int] IDENTITY(1,1) NOT NULL,
+	[ProviderName] [varchar](50) NOT NULL,
+	[ContactFirstName] [varchar](50) NOT NULL,
+	[ContactLastName] [varchar](50) NOT NULL,
+	[ContactPhoneNum] [varchar](50) NOT NULL,
+	[ContactEmail] [varchar](50) NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	CONSTRAINT PK_RewardProvider PRIMARY KEY (ProviderID));
+
+
+CREATE TABLE [dbo].[RewardCategory](
+	[CategoryID] [int] IDENTITY(1,1) NOT NULL,
+	[Description] [varchar](50) NOT NULL,
+	[QuantityBought] [int] NOT NULL,
+	[TotalSales] [money] NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	CONSTRAINT PK_RewardCategory PRIMARY KEY (CategoryID));
+
+
+CREATE TABLE [dbo].[RewardItem](
+	[RewardID] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [varchar](50) NOT NULL,
+	[Description] [varchar](50) NOT NULL,
+	[Price] [money] NOT NULL,
+	[StartDate] [datetime] NOT NULL,
+	[EndDate] [datetime] NULL,
+	[Quantity] [int] NOT NULL,
+	[LastUpdatedBy] [varchar](50) NOT NULL,
+	[LastUpdated] [datetime] NOT NULL,
+	[ProviderID] [int] NOT NULL,
+	[CategoryID] [int] NOT NULL,
+	CONSTRAINT PK_RewardItem PRIMARY KEY (RewardID),
+	CONSTRAINT FK_RewardItemProvider FOREIGN KEY (ProviderID) references RewardProvider,
+	CONSTRAINT FK_RewardItemCategory FOREIGN KEY (CategoryID) references RewardCategory);
+
+
+CREATE TABLE [dbo].[Image](
+	[ImageID] [int] IDENTITY(1,1) NOT NULL,
+	[EmployeeID] [int] NULL,
+	[RewardID] [int] NULL,
+	[ImageURL] [nvarchar](max) NOT NULL,
+	CONSTRAINT PK_IMAGE PRIMARY KEY (ImageID),
+	CONSTRAINT FK_IMAGEEmployee FOREIGN KEY (EmployeeID) references Employee,
+	CONSTRAINT FK_IMAGEReward FOREIGN KEY (RewardID) references RewardItem);
+
+CREATE TABLE [dbo].[Transaction](
+	[TransactionID] [int] IDENTITY(1,1) NOT NULL,
+	[Cost] [money] NOT NULL,
+	[PurchaseTime] [datetime] NOT NULL,
+	[EmployeeID] [int] NOT NULL,
+	[RewardID] [int] NOT NULL,
+	CONSTRAINT PK_Transaction PRIMARY KEY (TransactionID),
+	CONSTRAINT FK_TransactionEmployee FOREIGN KEY (EmployeeID) references Employee,
+	CONSTRAINT FK_TransactionReward FOREIGN KEY (RewardID) references RewardItem);
+
+
+
+CREATE TABLE [dbo].[FeedInformation](
+	[PostID] [int] IDENTITY(1,1) NOT NULL,
+	[PostTime] [datetime] NOT NULL,
+	[NumOfLikes] [int] NOT NULL,
+	[AchievementID] [int] NULL,
+	[TransactionID] [int] NULL,
+	CONSTRAINT PK_FeedInformation PRIMARY KEY (PostID),
+	CONSTRAINT FK_FeedInformationEmployee FOREIGN KEY (TransactionID) references [dbo].[Transaction],
+	CONSTRAINT FK_FeedInformationAchievement FOREIGN KEY (AchievementID) references Achievement);
+
+CREATE TABLE [dbo].[Fund](
+	[FundID] [int] IDENTITY(1,1) NOT NULL, 
+	[AccountTo] [varchar](30) NOT NULL,
+	[AccountFrom] [varchar](30) NOT NULL,
+	[Amount] [money] NOT NULL,
+	CONSTRAINT PK_FundID PRIMARY KEY (FundID));
+
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('bonder','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('choyew','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('stanti','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('kosinl','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('bouchc','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('willit','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('niller','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('perezd','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('puentd','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('aubikd','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('hawkij','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('warneh','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('emersj','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('mcgheg','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('fallwc','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('keithc','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('drakem','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('marshg','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('conradl','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('casteg','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('baumej','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('brownm','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('walteb','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('boothm','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('shepha','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('shrutd','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('wallac','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('hanset','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('vandee','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('barnes','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('youngt','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('berryc','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('hunter','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('fosteb','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('lawhot','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('terroh','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('morred','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('aguile','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('dimagm','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('fosteh','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('cuttec','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('engelk','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('hubbas','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('hollok','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('bradyr','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('violiv','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('adhocl','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('lucasg','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('kendrs','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('houste','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('xeniaa','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('perezj','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('duganv','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('belchj','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('goingc','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('labonk','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('jamesm','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('beltol','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('davisa','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('jordam','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('kelled','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('santii','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('byersc','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('thomad','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('grishl','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('headsj','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('edmonj','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('bandyw','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('gutiea','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('albere','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('mannik','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('priced','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('dyersp','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('smartm','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('travic','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('peterh','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('truitj','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('martik','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('goinet','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('madelh','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+INSERT INTO [dbo].[EmployeeLogin] ([UserName],[PasswordHash],[LastLogin],[LastUpdatedBy],[LastUpdated]) VALUES ('admin','admin','2018-02-24','Andrea Derflinger','2018-02-02');
+
+ 
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Richard','Bonde','richbond@gmail.com','Andrea Derflinger','2018-02-02','0','0','1');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('William','Choye','willchoy@gmail.com','Andrea Derflinger','2018-02-02','0','0','2');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Ismael','Stanton','stantonis@gmail.com','Andrea Derflinger','2018-02-02','0','0','3');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Lacey','Kosinski','Kosinlac@gmail.com','Andrea Derflinger','2018-02-02','0','0','4');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Candace','Boucher','bouchecan@gmail.com','Andrea Derflinger','2018-02-02','0','0','5');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Taylor','Williams','williamst@gmail.com','Andrea Derflinger','2018-02-02','0','0','6');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Raul','Nilles','nillesra@gmail.com','Andrea Derflinger','2018-02-02','0','0','7');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('David','Perez','perezd@gmail.com','Andrea Derflinger','2018-02-02','0','0','8');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Doreen','Puente','perezd@gmail.com','Andrea Derflinger','2018-02-02','0','0','9');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Don','Aubik','aubikdo@gmail.com','Andrea Derflinger','2018-02-02','0','0','10');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Joel','Hawkins','perezd@gmail.com','Andrea Derflinger','2018-02-02','0','0','11');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Hannah','Warner','warneh@gmail.com','Andrea Derflinger','2018-02-02','0','0','12');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('John','Emerson','emersj@gmail.com','Andrea Derflinger','2018-02-02','0','0','13');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Gavin','McGhee','mcgheega@gmail.com','Andrea Derflinger','2018-02-02','0','0','14');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Claudia','Fallway','fallwc@gmail.com','Andrea Derflinger','2018-02-02','0','0','15');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Corey','Keith','keithc@gmail.com','Andrea Derflinger','2018-02-02','0','0','16');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Mary','Drake','drakem@gmail.com','Andrea Derflinger','2018-02-02','0','0','17');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Greg','Marshall','marshg@gmail.com','Andrea Derflinger','2018-02-02','0','0','18');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Lelah','Conrad','conral@gmail.com','Andrea Derflinger','2018-02-02','0','0','19');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Gerald','Caster','casteg@gmail.com','Andrea Derflinger','2018-02-02','0','0','20');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Jonathan','Baumer','baumej@gmail.com','Andrea Derflinger','2018-02-02','0','0','21');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Molly','Brown','brownm@gmail.com','Andrea Derflinger','2018-02-02','0','0','22');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Barbara','Walters','walteb@gmail.com','Andrea Derflinger','2018-02-02','0','0','23');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Maria','Booth','boothm@gmail.com','Andrea Derflinger','2018-02-02','0','0','24');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Alexa','Shepherd','shepha@gmail.com','Andrea Derflinger','2018-02-02','0','0','25');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Dwight','Shrute','shrutd@gmail.com','Andrea Derflinger','2018-02-02','0','0','26');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Charlene','Wallace','wallac@gmail.com','Andrea Derflinger','2018-02-02','0','0','27');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Terry','Hansen','hanset@gmail.com','Andrea Derflinger','2018-02-02','0','0','28');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Eugnene','Vanderbilt','vandee@gmail.com','Andrea Derflinger','2018-02-02','0','0','29');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Shannon','Barney','barnes@gmail.com','Andrea Derflinger','2018-02-02','0','0','30');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Tim','Young','youngt@gmail.com','Andrea Derflinger','2018-02-02','0','0','31');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Cynthia','Berry','berryc@gmail.com','Andrea Derflinger','2018-02-02','0','0','32');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Rob','Hunter','hunter@gmail.com','Andrea Derflinger','2018-02-02','0','0','33');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Beverly','Foster','fosteb@gmail.com','Andrea Derflinger','2018-02-02','0','0','34');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Trista','Lawhorn','lawhot@gmail.com','Andrea Derflinger','2018-02-02','0','0','35');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Helen','Terrones','terroh@gmail.com','Andrea Derflinger','2018-02-02','0','0','36');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Donna','Moore','morred@gmail.com','Andrea Derflinger','2018-02-02','0','0','37');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Eleanor','Aguilar','aguile@gmail.com','Andrea Derflinger','2018-02-02','0','0','38');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Mary','Dimaggio','dimagm@gmail.com','Andrea Derflinger','2018-02-02','0','0','39');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Holly','Foster','fosteh@gmail.com','Andrea Derflinger','2018-02-02','0','0','40');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Craig','Cutter','cuttec@gmail.com','Andrea Derflinger','2018-02-02','0','0','41');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Katie','Engelmann','engelk@gmail.com','Andrea Derflinger','2018-02-02','0','0','42');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Scott','Hubbard','hubbas@gmail.com','Andrea Derflinger','2018-02-02','0','0','43');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Kelly','Holloway','hollok@gmail.com','Andrea Derflinger','2018-02-02','0','0','44');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Robert','Brady','bradyr@gmail.com','Andrea Derflinger','2018-02-02','0','0','45');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Viola','Violin','violiv@gmail.com','Andrea Derflinger','2018-02-02','0','0','46');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Louise','Adhock','adhocl@gmail.com','Andrea Derflinger','2018-02-02','0','0','47');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Greg','Lucas','lucasg@gmail.com','Andrea Derflinger','2018-02-02','0','0','48');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Sandra','Kendra','kendrs@gmail.com','Andrea Derflinger','2018-02-02','0','0','49');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Erin','Houston','houste@gmail.com','Andrea Derflinger','2018-02-02','0','0','50');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Alice','Xenia','xeniaa@gmail.com','Andrea Derflinger','2018-02-02','0','0','51');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Juan','Perez','perezj@gmail.com','Andrea Derflinger','2018-02-02','0','0','52');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Victoria','Dugan','duganv@gmail.com','Andrea Derflinger','2018-02-02','0','0','53');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Jillian','Belcher','belchj@gmail.com','Andrea Derflinger','2018-02-02','0','0','54');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Courtney','Going','goingc@gmail.com','Andrea Derflinger','2018-02-02','0','0','55');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Keith','Labontee','labonk@gmail.com','Andrea Derflinger','2018-02-02','0','0','56');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Mark','James','jamesm@gmail.com','Andrea Derflinger','2018-02-02','0','0','57');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Lillian','Belton','beltol@gmail.com','Andrea Derflinger','2018-02-02','0','0','58');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Aaron','Davis','davisa@gmail.com','Andrea Derflinger','2018-02-02','0','0','59');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Michael','Jordan','jordam@gmail.com','Andrea Derflinger','2018-02-02','0','0','60');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Danny','Kelley','kelled@gmail.com','Andrea Derflinger','2018-02-02','0','0','61');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Ingrid','Santiago','santii@gmail.com','Andrea Derflinger','2018-02-02','0','0','62');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Chrystal','Byers','byersc@gmail.com','Andrea Derflinger','2018-02-02','0','0','63');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('David','Thomas','thomad@gmail.com','Andrea Derflinger','2018-02-02','0','0','64');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Laurie','Grisham','grishl@gmail.com','Andrea Derflinger','2018-02-02','0','0','65');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('James','Heads','headsj@gmail.com','Andrea Derflinger','2018-02-02','0','0','66');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Joe','Edmond','edmonj@gmail.com','Andrea Derflinger','2018-02-02','0','0','67');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Wilma','Bandy','bandyw@gmail.com','Andrea Derflinger','2018-02-02','0','0','68');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Albert','Gutierrez','gutiea@gmail.com','Andrea Derflinger','2018-02-02','0','0','69');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Eddy','Albert','albere@gmail.com','Andrea Derflinger','2018-02-02','0','0','70');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Kevin','Manning','mannik@gmail.com','Andrea Derflinger','2018-02-02','0','0','71');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Diane','Price','priced@gmail.com','Andrea Derflinger','2018-02-02','0','0','72');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Pearl','Dyers','dyersp@gmail.com','Andrea Derflinger','2018-02-02','0','0','73');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Mae','Smart','smartm@gmail.com','Andrea Derflinger','2018-02-02','0','0','74');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Charlie','Travis','travic@gmail.com','Andrea Derflinger','2018-02-02','0','0','75');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Hanna','Petersonn','peterh@gmail.com','Andrea Derflinger','2018-02-02','0','0','76');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Jonny','Truitt','truitj@gmail.com','Andrea Derflinger','2018-02-02','0','0','77');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Kesha','Martinez','martik@gmail.com','Andrea Derflinger','2018-02-02','0','0','78');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Tia','Goines','goinet@gmail.com','Andrea Derflinger','2018-02-02','0','0','79');
+INSERT INTO [dbo].[Employee] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[Points],[Enabled],[EmpLoginID]) VALUES ('Heather','Madeline','madelh@gmail.com','Andrea Derflinger','2018-02-02','0','0','80');
+
+INSERT INTO [dbo].[Administrator] ([FirstName],[LastName],[Email],[LastUpdatedBy],[LastUpdated],[EmpLoginID]) VALUES ('Andrea','Derflinger','elkTestIncoming@gmail.com','Andrea Derflinger','2018-01-01',81);
+
+INSERT INTO [dbo].[Value] ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Health and Wellness','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[Value] ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Community Involvement','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[Value] ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Customer Service','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[Value] ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Process Improvement Intiatives','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[Value] ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Team Building/Education/Leadership Development','Andrea Derflinger','2018-01-01');
+
+INSERT INTO [dbo].[Applaud]  ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Creative','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[Applaud]  ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Distinguished','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[Applaud]  ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Exceptional','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[Applaud]  ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Fresh Approach','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[Applaud]  ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Superior','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[Applaud]  ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Ingenious','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[Applaud]  ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Incomparable','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[Applaud]  ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Outstanding','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[Applaud]  ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Surprising','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[Applaud]  ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Symbolic','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[Applaud]  ([Name],[LastUpdatedBy],[LastUpdated]) VALUES ('Unexpected','Andrea Derflinger','2018-01-01');
+
+INSERT INTO [dbo].[RewardProvider] ([ProviderName],[ContactFirstName],[ContactLastName],[ContactPhoneNum],[ContactEmail],[LastUpdatedBy],[LastUpdated]) VALUES ('Jack Brown','Jack','Brown','703-123-4556','jblivin@gmail.com','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[RewardProvider] ([ProviderName],[ContactFirstName],[ContactLastName],[ContactPhoneNum],[ContactEmail],[LastUpdatedBy],[LastUpdated]) VALUES ('Massanutten','John','Smith','540-123-4556','skitheslopes@gmail.com','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[RewardProvider] ([ProviderName],[ContactFirstName],[ContactLastName],[ContactPhoneNum],[ContactEmail],[LastUpdatedBy],[LastUpdated]) VALUES ('Luray Caverns','Mark','Luray','540-568-4556','luraycaverns@gmail.com','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[RewardProvider] ([ProviderName],[ContactFirstName],[ContactLastName],[ContactPhoneNum],[ContactEmail],[LastUpdatedBy],[LastUpdated]) VALUES ('Amazon','Jeff','Bezos','454-123-4556','amazon@gmail.com','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[RewardProvider] ([ProviderName],[ContactFirstName],[ContactLastName],[ContactPhoneNum],[ContactEmail],[LastUpdatedBy],[LastUpdated]) VALUES ('Bennys','Benny','Sorintino','540-568-0954','bennys@gmail.com','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[RewardProvider] ([ProviderName],[ContactFirstName],[ContactLastName],[ContactPhoneNum],[ContactEmail],[LastUpdatedBy],[LastUpdated]) VALUES ('Planet Fitness Harrisonburg','Maria','Earhty','458-123-4556','pfitness@gmail.com','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[RewardProvider] ([ProviderName],[ContactFirstName],[ContactLastName],[ContactPhoneNum],[ContactEmail],[LastUpdatedBy],[LastUpdated]) VALUES ('Clementines','Mark','Brown','898-123-4556','clementines@gmail.com','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[RewardProvider] ([ProviderName],[ContactFirstName],[ContactLastName],[ContactPhoneNum],[ContactEmail],[LastUpdatedBy],[LastUpdated]) VALUES ('Lush Spas','Julia','Brown','703-465-4556','lush@gmail.com','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[RewardProvider] ([ProviderName],[ContactFirstName],[ContactLastName],[ContactPhoneNum],[ContactEmail],[LastUpdatedBy],[LastUpdated]) VALUES ('Jack Brown','Jack','Brown','703-123-4556','jblivin@gmail.com','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[RewardProvider] ([ProviderName],[ContactFirstName],[ContactLastName],[ContactPhoneNum],[ContactEmail],[LastUpdatedBy],[LastUpdated]) VALUES ('The Yellow Button','Jane','Amarillo','789-123-4556','yellow@gmail.com','Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[RewardProvider] ([ProviderName],[ContactFirstName],[ContactLastName],[ContactPhoneNum],[ContactEmail],[LastUpdatedBy],[LastUpdated]) VALUES ('Artful Dodger','Kim','Dodger','703-656-4556','artdodger@gmail.com','Andrea Derflinger','2018-01-01');
+
+INSERT INTO [dbo].[RewardCategory]  ([Description],[QuantityBought],[TotalSales],[LastUpdatedBy],[LastUpdated]) VALUES ('Entertainment',25,0,'Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[RewardCategory]  ([Description],[QuantityBought],[TotalSales],[LastUpdatedBy],[LastUpdated]) VALUES ('Health and Wellness',45,0,'Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[RewardCategory]  ([Description],[QuantityBought],[TotalSales],[LastUpdatedBy],[LastUpdated]) VALUES ('Retail',60,0,'Andrea Derflinger','2018-01-01');
+INSERT INTO [dbo].[RewardCategory]  ([Description],[QuantityBought],[TotalSales],[LastUpdatedBy],[LastUpdated]) VALUES ('Restaurants',154,0,'Andrea Derflinger','2018-01-01');
+
+
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Jack Browns $25 Gift Card','$25 Gift Card','25','2018-01-01','2018-04-01','4','Andrea Derflinger','2018-01-01','1','4');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Massanutten $100 Gift Card','$100 Gift Card','80','2018-01-01','2018-04-01','10','Andrea Derflinger','2018-01-01','2','1');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Tour for Two','Underground Adventure','50','2018-01-01','2018-04-01','15','Andrea Derflinger','2018-01-01','3','1');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Amazon $10 Gift Card','$10 Gift Card','10','2018-01-01','2018-04-01','50','Andrea Derflinger','2018-01-01','4','3');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('1 Slice of Bennys pizza','Its pizza as big as your face!','5','2018-01-01','2018-04-01','100','Andrea Derflinger','2018-01-01','5','4');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Planet Fitness 1 month trial','Free membership','50','2018-01-01','2018-04-01','20','Andrea Derflinger','2018-01-01','6','2');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Clementines Dinner','2 entrees and 1 dessert included','30','2018-01-01','2018-04-01','20','Andrea Derflinger','2018-01-01','7','4');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Lush Spa Day Pass','Platinum level spa package','25','2018-01-01','2018-04-01','25','Andrea Derflinger','2018-01-01','8','2');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('The Yellow Button $50 Gift Card','Gift Card to a high end boutique','30','2018-01-01','2018-04-01','10','Andrea Derflinger','2018-01-01','10','3');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Artful Dodger $20 Gift Card','unique dining experience in downtown Harrisonburg','10','2018-01-01','2018-04-01','30','Andrea Derflinger','2018-01-01','11','4');
+
+INSERT INTO [dbo].[Image] ([EmployeeID],[RewardID],[ImageURL]) VALUES (NULL,'1','https://s3.amazonaws.com/484imagescourtney/burger.jpeg');
+INSERT INTO [dbo].[Image] ([EmployeeID],[RewardID],[ImageURL]) VALUES (NULL,'2','https://s3.amazonaws.com/484imagescourtney/ski.jpeg');
+INSERT INTO [dbo].[Image] ([EmployeeID],[RewardID],[ImageURL]) VALUES (NULL,'3','https://s3.amazonaws.com/484imagescourtney/cave.jpeg');
+INSERT INTO [dbo].[Image] ([EmployeeID],[RewardID],[ImageURL]) VALUES (NULL,'4','https://s3.amazonaws.com/484imagescourtney/shopping.jpg');
+INSERT INTO [dbo].[Image] ([EmployeeID],[RewardID],[ImageURL]) VALUES (NULL,'5','https://s3.amazonaws.com/484imagescourtney/pizza.jpeg');
+INSERT INTO [dbo].[Image] ([EmployeeID],[RewardID],[ImageURL]) VALUES (NULL,'6','https://s3.amazonaws.com/484imagescourtney/workout.jpeg');
+INSERT INTO [dbo].[Image] ([EmployeeID],[RewardID],[ImageURL]) VALUES (NULL,'7','https://s3.amazonaws.com/484imagescourtney/dinner.jpeg');
+INSERT INTO [dbo].[Image] ([EmployeeID],[RewardID],[ImageURL]) VALUES (NULL,'8','https://s3.amazonaws.com/484imagescourtney/spa.jpg');
+INSERT INTO [dbo].[Image] ([EmployeeID],[RewardID],[ImageURL]) VALUES (NULL,'9','https://s3.amazonaws.com/484imagescourtney/boutique.jpeg');
+INSERT INTO [dbo].[Image] ([EmployeeID],[RewardID],[ImageURL]) VALUES (NULL,'10','https://s3.amazonaws.com/484imagescourtney/art.jpeg');
+
+
+
+
+
+
+
+	
