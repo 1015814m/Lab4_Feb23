@@ -11,7 +11,9 @@ public partial class Rewards : System.Web.UI.Page
 {
     static Employee user;
     static int index;
-
+    static int num;
+    static RewardItem[] itemArray;
+    static string error = "";
     protected void Page_Load(object sender, EventArgs e)
     {
         if (Session["employeeLoggedIn"] == null)
@@ -23,214 +25,228 @@ public partial class Rewards : System.Web.UI.Page
             Response.Redirect("Login.aspx");
         }
         user = (Employee)Session["user"];
+        user.Points = getPoints(findEmployeeID(user.EmpLoginID));
+        Session["user"] = user;
 
-        if (!IsPostBack)
+        num = countRewards();
+        itemArray = new RewardItem[num];
+
+        lblPoints.Text = "Welcome " + user.FirstName + " " + user.LastName + " <br /> You currently have " + user.Points + " Points!";
+        errorMessage.Text = error;
+
+
+        populateArray();
+
+        Image[] imgArray = new Image[num];
+        TextBox[] txtArray = new TextBox[num];
+        Button[] btnArray = new Button[num];
+
+        for (int i = 0; i < num; i++)
         {
-            try
-            {
-                SqlConnection conn = ProjectDB.connectToDB();
-                System.Data.SqlClient.SqlCommand insert = new System.Data.SqlClient.SqlCommand();
-                insert.Connection = conn;
+            imgArray[i] = new Image();
+            imgArray[i].Height = 150;
+            imgArray[i].Width = 100;
+            imgArray[i].BorderStyle = BorderStyle.Solid;
+            
+            
 
-                //insert.CommandText = "select concat([RewardID],' ',[Name],' ',[Description], ' ',[Price],' ',[StartDate]) AS search_RewardItems from [dbo].[RewardItem]";
-                ////////////////////////////PARAMATERIZE////////////////////////////////////
-                insert.CommandText = "select concat([dbo].[RewardItem].[RewardID],' ',[dbo].[RewardItem].[Name],' ',[dbo].[RewardItem].[Price],' ',[dbo].[RewardProvider].[ProviderName]) AS search_RewardItems FROM [dbo].[RewardItem] INNER JOIN [dbo].[RewardProvider] ON [dbo].[RewardItem].[ProviderID] = [dbo].[RewardProvider].[ProviderID]";
+            txtArray[i] = new TextBox();
+            txtArray[i].Height = 200;
+            txtArray[i].Width = 500;
+            txtArray[i].TextMode = TextBoxMode.MultiLine;
 
-                lstRewardsView.DataSource = insert.ExecuteReader();
+            btnArray[i] = new Button();
+            btnArray[i].Text = "Buy";
+            btnArray[i].ID = i.ToString();
+            btnArray[i].Click += getControl;
 
-                lstRewardsView.DataTextField = "search_RewardItems";
-                lstRewardsView.DataBind();
-                lstElligable.Visible = false;
-                lstSearchName.Visible = false;
-                lstSearchProvider.Visible = false;
-                conn.Close();
-            }
-            //Shows an error message if there is a problem connecting to the database
-            catch (Exception)
-            {
-                ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('ERROR')", true);
-
-            }
+            feed.Controls.Add(imgArray[i]);
+            imgArray[i].ImageUrl = findImage(itemArray[i].RewardID);
+            feed.Controls.Add(txtArray[i]);
+            feed.Controls.Add(new LiteralControl("<br />"));
+            feed.Controls.Add(btnArray[i]);
+            feed.Controls.Add(new LiteralControl("<br />"));
         }
+
+        for (int i = 0; i < itemArray.Length; i++)
+        {
+            txtArray[i].Text += "Reward Name: " + itemArray[i].Name + Environment.NewLine;
+            txtArray[i].Text += "Reward Description: " + itemArray[i].Description;
+            txtArray[i].Text += Environment.NewLine + "Price: $" + Decimal.Round(itemArray[i].Price) + Environment.NewLine;
+            txtArray[i].Text += "Offer Start Date: " + (itemArray[i].StartDate).ToShortDateString() + Environment.NewLine;
+            txtArray[i].Text += "Offer End Date: " + (itemArray[i].EndDate).ToShortDateString() + Environment.NewLine;
+            txtArray[i].Text += "Quantity Remaining: " + itemArray[i].Quantity + Environment.NewLine;
+        }
+        
     }
-    //purchases a reward
-    protected void btnSelect_Click(object sender, EventArgs e)
+
+    protected int countRewards()
     {
-        //gets the rewardID of the selected item
-        String id = "";
+        int count = 0;
         try
         {
-            if (lstRewardsView.Visible == true)
+            string commandText = "SELECT COUNT(RewardID) as Result FROM [dbo].[RewardItem] WHERE [EndDate] >= @EndDate AND [StartDate] <= @StartDate AND [Quantity] > @Quantity";
+            SqlConnection conn = ProjectDB.connectToDB();
+            SqlCommand select = new SqlCommand(commandText, conn);
+
+            select.Parameters.AddWithValue("@EndDate", DateTime.Now);
+            select.Parameters.AddWithValue("@StartDate", DateTime.Now);
+            select.Parameters.AddWithValue("@Quantity", 0);
+
+            SqlDataReader reader = select.ExecuteReader();
+
+            if(reader.HasRows)
             {
-                String search = lstRewardsView.SelectedItem.ToString();
-                id = findItemID(search);
+                reader.Read();
+                count = (int)reader["Result"];
             }
-            else if (lstSearchName.Visible == true)
-            {
-                String search = lstSearchName.SelectedItem.ToString();
-                id = findItemID(search);
-            }
-            else if (lstSearchProvider.Visible == true)
-            {
-                String search = lstSearchProvider.SelectedItem.ToString();
-                id = findItemID(search);
-            }
-            else if (lstElligable.Visible == true)
-            {
-                String search = lstElligable.SelectedItem.ToString();
-                id = findItemID(search);
-            }
+            conn.Close();
+
         }
-        catch
+        catch (Exception)
         {
-            ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('You must select a reward to purchase')", true);
+            error += "<br/>There are no reward available.";
         }
-        if (user.Points >= FindCost(id))
+        return count;
+    }
+
+    protected void populateArray()
+    {
+        try
         {
-            //enters data into the transaction table in the DB
+            string commandText = "SELECT [RewardID],[Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[ProviderID],[CategoryID]" +
+                "FROM [dbo].[RewardItem] WHERE [EndDate] >= @EndDate AND [StartDate] <= @StartDate AND [Quantity] > @Quantity";
+            SqlConnection conn = ProjectDB.connectToDB();
+            SqlCommand select = new SqlCommand(commandText, conn);
+
+            select.Parameters.AddWithValue("@EndDate", DateTime.Now);
+            select.Parameters.AddWithValue("@StartDate", DateTime.Now);
+            select.Parameters.AddWithValue("@Quantity", 0);
+
+            SqlDataReader reader = select.ExecuteReader();
+            int a = 0;
+
+            while(reader.Read())
+            {
+                int rewardID, quantity, providerID, categoryID;
+                string name, description;
+                DateTime startDate, endDate;
+                Decimal price;
+
+                rewardID = (int)reader[0];
+                name = reader[1].ToString();
+                description = reader[2].ToString();
+                price = (Decimal)reader[3];
+                startDate = (DateTime)reader[4];
+                endDate = (DateTime)reader[5];
+                quantity = (int)reader[6];
+                providerID = (int)reader[7];
+                categoryID = (int)reader[8];
+
+                itemArray[a] = new RewardItem(rewardID, name, description, price, startDate, endDate, quantity, providerID, categoryID);
+
+                a++;
+            }
+            conn.Close();
+        }
+        catch (Exception)
+        {
+            error += "<br/>Error Populating Rewards.";
+        }
+    }
+
+    protected void getControl(object sender, EventArgs e)
+    {
+        int b = 0;
+        try
+        {
+            string k = (sender as Button).ID.ToString();
+            num = Int32.Parse(k);
+            if (user.Points < itemArray[num].Price)
+            {
+                error = "<br/>You do not have enough points to make this purchase.";
+            }
+            else
+            {
+                buyReward(num);
+            }
+            Response.Redirect("Rewards.aspx");
+        }
+        catch (Exception)
+        {
+
+        }
+    }
+
+    protected void buyReward(int id)
+    {
+        if (user.Points >= itemArray[id].Price)
+        {
             try
             {
+                string commandText = "INSERT INTO [dbo].[Transaction] values (@Cost, @PurchaseTime, @EmployeeID, @RewardID)";
                 SqlConnection conn = ProjectDB.connectToDB();
-                System.Data.SqlClient.SqlCommand insert = new System.Data.SqlClient.SqlCommand();
-                insert.Connection = conn;
+                SqlCommand insert = new SqlCommand(commandText, conn);
 
-                insert.CommandText = "insert into [dbo].[Transaction] values (@cost, @purchaseTime, @empID, @rewardID)";
-                insert.Parameters.AddWithValue("@cost", FindCost(id));
-                insert.Parameters.AddWithValue("@purchaseTime", DateTime.Now);
-                insert.Parameters.AddWithValue("@empID", FindID(user.EmpLoginID));
-                insert.Parameters.AddWithValue("@rewardID", id);
+                insert.Parameters.AddWithValue("@Cost", itemArray[id].Price);
+                insert.Parameters.AddWithValue("@PurchaseTime", DateTime.Now);
+                insert.Parameters.AddWithValue("@EmployeeID", findEmployeeID(user.EmpLoginID));
+                insert.Parameters.AddWithValue("@RewardID", itemArray[id].RewardID);
+
                 insert.ExecuteNonQuery();
 
                 conn.Close();
-                ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('Reward Purchased Successfully')", true);
 
-                //update points
-                SubtractPoints(pointsSubtraction(FindCost(id), Convert.ToDecimal(user.Points)), FindID(user.EmpLoginID));
-                user.Points -= FindCost(id);
-                //update Quantity in the database
-                SubtractQuantity(quantitySubtraction(findQuantity(id)), id);
+                subtractPoints(itemArray[id].Price);
 
+                subtractQuantity(1, itemArray[id].RewardID);
+
+                updateFeed();
+
+                sendEmail(user.Email, id);
             }
-            //Shows an error message if there is a problem connecting to the database
             catch (Exception)
             {
-                ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('data connection error')", true);
+                error += "<br/>Error Purchasing Reward.";
             }
         }
         else
         {
-            ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('You do not have enough points to purchase this reward')", true);
+            error += "<br/>You do not have enough points to make this purchase.";
         }
     }
 
-    public String findItemID(String search)
+    protected void subtractPoints(Decimal cost)
     {
-        String id = "";
-        for (int i = 0; i < search.Length; i++)
-        {
-            if (search.Substring(i, 1) != " ")
-            {
-                id += search.Substring(i, 1);
-            }
-            else
-            {
-                break;
-            }
-        }
-        return id;
-    }
-    //allows employee to search the rewards page based on name or company name
-    protected void btnSearch_Click(object sender, EventArgs e)
-    {
-        hideLstViews();
+
         try
         {
-            lstRewardsView.DataSource = null;
-            lstRewardsView.Items.Clear();
+            string commandText = "UPDATE [dbo].[Employee] set [Points] = @Points WHERE [EmployeeID] = @EmployeeID";
             SqlConnection conn = ProjectDB.connectToDB();
-            System.Data.SqlClient.SqlCommand insert = new System.Data.SqlClient.SqlCommand();
-            insert.Connection = conn;
+            SqlCommand update = new SqlCommand(commandText, conn);
 
-            //see if you are searching for reward name or reward provider
-            if (rdoName.Checked)
-            {
-                lstSearchName.Visible = true;
-                insert.CommandText = "select concat([RewardID],' ',[Name],' ',[Description], ' ',[Price],' ',[StartDate]) AS search_RewardItems from [dbo].[RewardItem] where lower([Name]) like lower (@rewardsearch)";
-                insert.Parameters.AddWithValue("@rewardsearch", "%" + txtSearch.Text + "%");
-                lstSearchName.DataSource = insert.ExecuteReader();
-                lstSearchName.DataTextField = "search_RewardItems";
-                lstSearchName.DataBind();
-                conn.Close();
-                if (lstSearchName.Items.Count == 0)
-                {
-                    ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('There were no rewards matching your search!!')", true);
-                    lstRewardsView.Visible = true;
-                    lstSearchName.Visible = false;
-                    return;
-                }
-            }
-            else if (rdoCompany.Checked)
-            {
-                lstSearchProvider.Visible = true;
-                insert.CommandText = "select concat([RewardID],' ',[Name],' ',[Description], ' ',[Price],' ',[StartDate]) AS search_RewardProvider from [dbo].[RewardItem] where lower([Name]) like lower(@providersearch)";
-                insert.Parameters.AddWithValue("@providersearch", "%" + txtSearch.Text + "%");
-                lstSearchProvider.DataSource = insert.ExecuteReader();
-                lstSearchProvider.DataTextField = "search_RewardProvider";
-                lstSearchProvider.DataBind();
-                conn.Close();
-                if (lstSearchProvider.Items.Count == 0)
-                {
-                    ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('There were no rewards matching your search!!')", true);
-                    lstRewardsView.Visible = true;
-                    lstSearchProvider.Visible = false;
-                    return;
-                }
-            }
-            else
-            {
-                ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('PLEASE SELECT A RADIO BUTTON')", true);
-            }
+            update.Parameters.AddWithValue("@Points", user.Points - cost);
+            update.Parameters.AddWithValue("@EmployeeID", findEmployeeID(user.EmpLoginID));
 
-        }
-        //Shows an error message if there is a problem connecting to the database
-        catch (Exception)
-        {
-            ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('ERROR2')", true);
-        }
-    }
-    //Displays only the rewards the employee is elligable for
-    protected void btnElligable_Click(object sender, EventArgs e)
-    {
-        hideLstViews();
-        try
-        {
-            SqlConnection conn = ProjectDB.connectToDB();
-            System.Data.SqlClient.SqlCommand insert = new System.Data.SqlClient.SqlCommand();
-            insert.Connection = conn;
+            user.Points = user.Points - cost;
 
-            insert.CommandText = "SELECT concat(RewardItem.RewardID,' ',RewardItem.Name,' ',RewardItem.Description,' ',RewardItem.Price,' ',RewardItem.StartDate) as search_Elligable FROM RewardItem WHERE RewardItem.Price <= @userpoints";
-            insert.Parameters.AddWithValue("@userpoints", user.Points);
-            lstElligable.DataSource = insert.ExecuteReader();
-            lstElligable.Visible = true;
-            lstElligable.DataTextField = "search_Elligable";
-            lstElligable.DataBind();
+            Session["user"] = user;
+
+            update.ExecuteNonQuery();
+
             conn.Close();
-
-            if (lstRewardsView.Items.Count == 0)
-            {
-                ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('There were no rewards matching your search!!')", true);
-                return;
-            }
         }
-        //Shows an error message if there is a problem connecting to the database
         catch (Exception)
         {
-            ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('eligable ERROR')", true);
+            error += "<br/>Error Subtracting Points";
         }
     }
-    //finds the EmployeeID
-    public int FindID(int id)
+
+    
+
+    protected int findEmployeeID(int id)
     {
+        int employeeID = -1;
         try
         {
             String commandText = "Select EmployeeID from [dbo].[EMPLOYEE] WHERE EmpLoginID = @EmpLoginID";
@@ -242,130 +258,207 @@ public partial class Rewards : System.Web.UI.Page
             if (reader.HasRows)
             {
                 reader.Read();
-                int employeeID = (int)reader["EmployeeID"];
-                conn.Close();
-                return employeeID;
+                employeeID = (int)reader["EmployeeID"];
+
             }
+            conn.Close();
+            return employeeID;
         }
         catch (Exception)
         {
-            ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('eligable ERROR1')", true);
-            return -1;
+            error += "<br/>Error Finding EmployeeID";
+            return employeeID;
         }
-        return -1;
     }
 
-    //Finds the cost of the reward
-    public Decimal FindCost(String id)
+    protected void updateFeed()
     {
+
         try
         {
-            String commandText = "Select Price from [dbo].[RewardItem] WHERE RewardID = @RewardID";
+            string commandText = "INSERT INTO [dbo].[FeedInformation] ([PostTime],[NumOfLikes],[TransactionID]) Values (@PostTime, @NumOfLikes, @TransactionID)";
+            SqlConnection conn = ProjectDB.connectToDB();
+            SqlCommand insert = new SqlCommand(commandText, conn);
+
+            insert.Parameters.AddWithValue("@PostTime", DateTime.Now);
+            insert.Parameters.AddWithValue("@NumOfLikes", 0);
+            insert.Parameters.AddWithValue("@TransactionID", findRecentTransaction());
+
+            insert.ExecuteNonQuery();
+
+            conn.Close();
+        }
+        catch (Exception)
+        {
+            error += "<br/>Error Updating Feed.";
+        }
+    }
+
+    protected int findRecentTransaction()
+    {
+        int a = -1;
+        try
+        {
+            string commandText = "SELECT MAX(TransactionID) as Result FROM [dbo].[Transaction]";
+            SqlConnection conn = ProjectDB.connectToDB();
+            SqlCommand select = new SqlCommand(commandText, conn);
+
+            SqlDataReader reader = select.ExecuteReader();
+
+            if (reader.HasRows)
+            {
+                reader.Read();
+                a = (int)reader["Result"];
+            }
+            conn.Close();
+        }
+        catch (Exception)
+        {
+            error += "<br/>Error Finding Recent Transactions.";
+        }
+        return a;
+    }
+
+    protected void subtractQuantity(int bought, int rewardID)
+    {
+
+        try
+        {
+            string commandText = "UPDATE [dbo].[RewardItem] SET [Quantity] = @Quantity WHERE [RewardID] = @RewardID";
+            SqlConnection conn = ProjectDB.connectToDB();
+            SqlCommand update = new SqlCommand(commandText, conn);
+
+            update.Parameters.AddWithValue("@Quantity", getQuantity(rewardID) - bought);
+            update.Parameters.AddWithValue("@RewardID", rewardID);
+
+            update.ExecuteNonQuery();
+
+            conn.Close();
+        }
+        catch (Exception ex)
+        {
+            error += "<br/>Error Subtracting Quantity";
+        }
+    }
+
+    protected int getQuantity(int id)
+    {
+        int quantity = 0;
+        try
+        {
+            string commandText = "SELECT [Quantity] FROM [dbo].[RewardItem] WHERE [RewardID] = @RewardID";
             SqlConnection conn = ProjectDB.connectToDB();
             SqlCommand select = new SqlCommand(commandText, conn);
 
             select.Parameters.AddWithValue("@RewardID", id);
+
             SqlDataReader reader = select.ExecuteReader();
-            if (reader.HasRows)
+
+            if(reader.HasRows)
             {
                 reader.Read();
-                Decimal price = (Decimal)reader["Price"];
-                conn.Close();
-                return price;
+                quantity = (int)reader["Quantity"];
             }
+            conn.Close();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('ex')", true);
-            return -1;
+            error += "<br/>Error Getting Quantity.";
         }
-        return -1;
+        return quantity;
     }
 
-    //math behind the subtraction method
-    public Decimal pointsSubtraction(Decimal cost, Decimal currentPoints)
+    protected string purchaseCode()
     {
-        Decimal answer = (currentPoints - cost);
-        return answer;
+
+        string password = "";
+        Random rnd = new Random();
+
+        int charLength = rnd.Next(12, 20);
+        string chars = "$%#@!*abcdefghijklmnopqrstuvwxyz1234567890?ABCDEFGHIJKLMNOPQRSTUVWXYZ^&";
+
+        for (int i = 0; i < charLength; i++)
+        {
+            int a = rnd.Next(0, chars.Length - 1);
+            password += chars.Substring(a, 1);
+        }
+
+        return password;
     }
 
-    //Subtracts the points in the Employee Table on the DB
-    public void SubtractPoints(Decimal points, int id)
+    protected void sendEmail(string emailTo, int id)
     {
         try
         {
-            String commandText = "update Employee set points = @pointsValue where EmployeeID = @EmployeeID";
+            string body = "You just purchased: " + itemArray[id].Name + "<br />Your purchase code is: " + purchaseCode() + "<br />Enjoy (:<br /> This is an automatic email from Elk Logistics Reward System";
+            string subject = "Receipt for: " + itemArray[id].Name;
+            Email purchaseEmail = new Email(emailTo, body, subject);
+            purchaseEmail.sendEmail();
+        }
+        catch (Exception)
+        {
+
+        }
+    }
+
+    protected string findImage(int id)
+    {
+        string img = "https://s3.amazonaws.com/484imagescourtney/default.jpg";
+
+        try
+        {
+            string commandText = "SELECT TOP 1 ImageURL from [dbo].[Image] WHERE RewardID = @RewardID";
             SqlConnection conn = ProjectDB.connectToDB();
             SqlCommand select = new SqlCommand(commandText, conn);
 
-            select.Parameters.AddWithValue("@pointsValue", points);
+            select.Parameters.AddWithValue("@RewardID", id);
+
+            SqlDataReader reader = select.ExecuteReader();
+
+            if (reader.HasRows)
+            {
+                reader.Read();
+                img = reader["ImageURL"].ToString();
+            }
+
+            conn.Close();
+            return img;
+        }
+        catch (Exception ex)
+        {
+            errorMessage.Text = "Error Finding Image " + ex;
+            return img;
+        }
+    }
+    protected Decimal getPoints(int id)
+    {
+        Decimal points = 0;
+        try
+        {
+            string commandText = "SELECT [Points] FROM [dbo].[Employee] WHERE [EmployeeID] = @EmployeeID";
+            SqlConnection conn = ProjectDB.connectToDB();
+            SqlCommand select = new SqlCommand(commandText, conn);
+
             select.Parameters.AddWithValue("@EmployeeID", id);
-            select.ExecuteNonQuery();
-            conn.Close();
-        }
-        catch (Exception ex)
-        {
-            ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('ex')", true);
-        }
-    }
 
-    //math behind the quantity subtraction method
-    public int quantitySubtraction(int quantity)
-    {
-        int answer = (quantity - 1);
-        return answer;
-    }
-
-    //Subtracts the quantity in the RewardItem Table on the DB
-    public void SubtractQuantity(int quantity, String id)
-    {
-        try
-        {
-            String commandText = "update RewardItem set quantity = @quantity where RewardID = @RewardID";
-            SqlConnection conn = ProjectDB.connectToDB();
-            SqlCommand select = new SqlCommand(commandText, conn);
-
-            select.Parameters.AddWithValue("@quantity", quantity);
-            select.Parameters.AddWithValue("@RewardID", id);
-            select.ExecuteNonQuery();
-            conn.Close();
-        }
-        catch (Exception ex)
-        {
-            ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('ex')", true);
-        }
-    }
-
-    public void hideLstViews()
-    {
-        lstRewardsView.Visible = false;
-        lstElligable.Visible = false;
-        lstSearchName.Visible = false;
-        lstSearchProvider.Visible = false;
-    }
-    public int findQuantity(String RewardID)
-    {
-        try
-        {
-            String commandText = "Select Quantity from [dbo].[RewardItem] WHERE RewardID = @RewardID";
-            SqlConnection conn = ProjectDB.connectToDB();
-            SqlCommand select = new SqlCommand(commandText, conn);
-
-            select.Parameters.AddWithValue("@RewardID", RewardID);
             SqlDataReader reader = select.ExecuteReader();
-            if (reader.HasRows)
+
+            if(reader.HasRows)
             {
                 reader.Read();
-                int quantity = (int)reader["Quantity"];
-                conn.Close();
-                return quantity;
+                points = (Decimal)reader["Points"];
             }
+            conn.Close();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('ex')", true);
-            return -1;
+
         }
-        return -1;
+        return points;
     }
+
+
+
+
+
 }

@@ -34,7 +34,7 @@ public partial class HomePage : System.Web.UI.Page
             Response.Redirect("Admin.aspx");
         }
 
-        welcomeMessage.Text = "Welcome " + user.FirstName + " " + user.LastName + " You currently have " + Decimal.Round(user.Points, 2) + " points!";
+        
         form1.Controls.Add(new LiteralControl("<br />"));
 
         Image[] imgArray = new Image[numOfPosts];
@@ -80,7 +80,7 @@ public partial class HomePage : System.Web.UI.Page
                     if (postsArray[a].AchievementID == -1)
                     {
                         txtArray[a].Text += findEmployee(findTransaction(postsArray[a].TransactionID).EmployeeID) + " used their points to purchase: "
-                            + findTransaction(postsArray[a].TransactionID).RewardID + " for $" + findTransaction(postsArray[a].TransactionID).Cost;
+                            + getRewardName(findTransaction(postsArray[a].TransactionID).RewardID) + " for $" + findTransaction(postsArray[a].TransactionID).Cost;
                         //add their image from s3
                         imgArray[a].ImageUrl = findImage(findTransaction(postsArray[a].TransactionID).EmployeeID);
                     }
@@ -375,6 +375,34 @@ public partial class HomePage : System.Web.UI.Page
             errorMessage.Text = "Error Finding Image " + ex;
             return img;
         }
+    }
+
+    protected string getRewardName(int id)
+    {
+        string name = "";
+        try
+        {
+            string commandText = "SELECT [Name] FROM [dbo].[RewardItem] WHERE [RewardID] = @RewardID";
+            SqlConnection conn = ProjectDB.connectToDB();
+            SqlCommand select = new SqlCommand(commandText, conn);
+
+            select.Parameters.AddWithValue("@RewardID", id);
+
+            SqlDataReader reader = select.ExecuteReader();
+
+            if(reader.HasRows)
+            {
+                reader.Read();
+                name = reader["Name"].ToString();
+            }
+            conn.Close();
+            
+        }
+        catch (Exception)
+        {
+
+        }
+        return name;
     }
 }
 

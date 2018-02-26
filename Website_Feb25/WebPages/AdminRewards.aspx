@@ -45,10 +45,10 @@
         <h3 class="w3-padding-64"><b>Top 10<br>Solutions</b></h3>
       </div>
       <div class="w3-bar-block">
-        <a href="Admin.aspx" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Home</a>  
+        <a href="Admin.aspx" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Analytics</a>  
         <a href="AdminRewards.aspx" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Add Rewards</a> 
-        <a href="AdminCreate.aspx" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Create/Edit Users</a> 
-        <a href="AdminAnalytics.aspx" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">View Analytics</a>  
+        <a href="AdminCreate.aspx" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Create/Edit Users</a>   
+        <a href="AdminAddFunds.aspx" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Add Funds</a>
         <a href="Logout.aspx" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Logout</a>
       </div>
     </nav>
@@ -74,42 +74,59 @@
 
     <div class="w3-container" id="administration" style="margin-top: 75px;">
         <form id="feed" runat="server">
-            &nbsp;<asp:Label ID="lblName" runat="server" Text="Reward Name"></asp:Label>
+            &nbsp;<br /><br />
+            <asp:Label ID="lblName" runat="server" Text="Reward Name"></asp:Label>
+            <asp:Label ID="lblErrorName" runat="server" ForeColor="Red" Text="*" Visible="False"></asp:Label>
             <br />
-            <asp:TextBox ID="txtName" runat="server"></asp:TextBox>
+            <asp:TextBox ID="txtName" runat="server" MaxLength="50"></asp:TextBox>
             <br /><br />
             <asp:Label ID="lblDescription" runat="server" Text="Description"></asp:Label>
+            <asp:Label ID="lblErrorDescription" runat="server" ForeColor="Red" Text="*" Visible="False"></asp:Label>
             <br />
-            <asp:TextBox ID="txtDescription" runat="server"></asp:TextBox>
+            <asp:TextBox ID="txtDescription" runat="server" MaxLength="50"></asp:TextBox>
             <br /><br />
             <asp:Label ID="lblPrice" runat="server" Text="Price"></asp:Label>
+            <asp:Label ID="lblErrorPrice" runat="server" ForeColor="Red" Text="*" Visible="False"></asp:Label>
             <br />
             <asp:TextBox ID="txtPrice" runat="server"></asp:TextBox>
+            <asp:CompareValidator ID="CompareValidator1" runat="server" Operator="DataTypeCheck" ErrorMessage="Invalid Price" Type="Currency" ControlToValidate="txtPrice" ForeColor="Red"></asp:CompareValidator>
             <br /><br />
             <asp:Label ID="lblStart"  runat="server" Text="Start Date"></asp:Label>
+            <asp:Label ID="lblErrorStart" runat="server" ForeColor="Red" Text="*" Visible="False"></asp:Label>
             <br />
             <asp:TextBox ID="txtStartDate" placeholder="mm/dd/yyyy" runat="server"></asp:TextBox>
+
             <br /><br />
             <asp:Label ID="lblEnd" runat="server" Text="End Date"></asp:Label>
+            <asp:Label ID="lblErrorEnd" runat="server" ForeColor="Red" Text="*" Visible="False"></asp:Label>
             <br />
             <asp:TextBox ID="txtEndDate" placeholder="mm/dd/yyyy" runat="server"></asp:TextBox>
+
             <br /><br />
             <asp:Label ID="lblQuantity" runat="server" Text="Quantity"></asp:Label>
+            <asp:Label ID="lblErrorQuantity" runat="server" ForeColor="Red" Text="*" Visible="False"></asp:Label>
             <br />
             <asp:TextBox ID="txtQuantity" runat="server"></asp:TextBox>
+            <asp:RegularExpressionValidator ID="RegularExpressionValidator2"
+                ControlToValidate="txtQuantity" runat="server" BackColor ="White"
+                ErrorMessage="Only Numbers allowed"
+                ValidationExpression="\d+" ForeColor="Red"></asp:RegularExpressionValidator>
             <br /><br />
             <asp:Label ID="lblProvider" runat="server" Text="Reward Provider"></asp:Label>
+            <asp:Label ID="lblErrorProvider" runat="server" ForeColor="Red" Text="*" Visible="False"></asp:Label>
             <br />
             <asp:DropDownList CssClass="ddl" ID="txtProvider" runat="server">
             </asp:DropDownList>
             <br /><br />
             <asp:Label ID="lblCategory" runat="server" Text="Reward Category"></asp:Label>
+            <asp:Label ID="lblErrorCategory" runat="server" ForeColor="Red" Text="*" Visible="False"></asp:Label>
             <br />
             <asp:DropDownList CssClass="ddl" ID="txtCategory" runat="server">
             </asp:DropDownList>
             <br /><br />
             <asp:Button ID="btnSave" runat="server" Text="Save Reward" OnClick="btnSave_Click" />
-            <br /><br />
+            <br /><asp:Label ID="lblError" runat="server" Text="Label" BackColor="White" ForeColor="Red" Visible="False"></asp:Label>
+            <br />
             <div class="w3-container" style="margin-top:80px" id="editshowcase">       
                     <h1 class="w3-xxxlarge w3-text-red">Edit and Delete Rewards</h1>
                     <hr style="width:50px;border:5px solid red; float: left;" class="w3-round">
@@ -117,7 +134,7 @@
             <br />
             <asp:GridView CssClass="ddl" ID="rewardGrid" runat="server" AllowPaging="True" AutoGenerateColumns="False" DataKeyNames="RewardID" DataSourceID="SqlDataSource2">
                 <Columns>
-                    <asp:CommandField ShowDeleteButton="True" ShowEditButton="True" />
+                    <asp:CommandField ShowEditButton="True" />
                     <asp:BoundField DataField="RewardID" HeaderText="RewardID" InsertVisible="False" ReadOnly="True" SortExpression="RewardID" />
                     <asp:BoundField DataField="Name" HeaderText="Name" SortExpression="Name" />
                     <asp:BoundField DataField="Description" HeaderText="Description" SortExpression="Description" />
@@ -127,10 +144,8 @@
                     <asp:BoundField DataField="Quantity" HeaderText="Quantity" SortExpression="Quantity" />
                 </Columns>
             </asp:GridView>
-            <asp:SqlDataSource ID="SqlDataSource2" runat="server" ConnectionString="<%$ ConnectionStrings:Lab4ConnectionString %>" DeleteCommand="DELETE FROM [RewardItem] WHERE [RewardID] = @RewardID" InsertCommand="INSERT INTO [RewardItem] ([Name], [Description], [Price], [StartDate], [EndDate], [Quantity]) VALUES (@Name, @Description, @Price, @StartDate, @EndDate, @Quantity)" SelectCommand="SELECT [RewardID], [Name], [Description], [Price], [StartDate], [EndDate], [Quantity] FROM [RewardItem]" UpdateCommand="UPDATE [RewardItem] SET [Name] = @Name, [Description] = @Description, [Price] = @Price, [StartDate] = @StartDate, [EndDate] = @EndDate, [Quantity] = @Quantity WHERE [RewardID] = @RewardID">
-                <DeleteParameters>
-                    <asp:Parameter Name="RewardID" Type="Int32" />
-                </DeleteParameters>
+            <asp:SqlDataSource ID="SqlDataSource2" runat="server" ConnectionString="<%$ ConnectionStrings:Lab4ConnectionString %>"  InsertCommand="INSERT INTO [RewardItem] ([Name], [Description], [Price], [StartDate], [EndDate], [Quantity]) VALUES (@Name, @Description, @Price, @StartDate, @EndDate, @Quantity)" SelectCommand="SELECT [RewardID], [Name], [Description], [Price], [StartDate], [EndDate], [Quantity] FROM [RewardItem]" UpdateCommand="UPDATE [RewardItem] SET [Name] = @Name, [Description] = @Description, [Price] = @Price, [StartDate] = @StartDate, [EndDate] = @EndDate, [Quantity] = @Quantity WHERE [RewardID] = @RewardID">
+
                 <InsertParameters>
                     <asp:Parameter Name="Name" Type="String" />
                     <asp:Parameter Name="Description" Type="String" />
@@ -182,4 +197,3 @@
 
     </body>
 </html>
-

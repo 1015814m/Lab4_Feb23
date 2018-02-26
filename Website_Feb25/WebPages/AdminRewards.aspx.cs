@@ -74,84 +74,180 @@ public partial class AdminRewards : System.Web.UI.Page
     {
         try
         {
+
             Boolean check = true;
             //validation that all entries are filled in
-            if (txtName.Text == "")
+            if (txtCategory.SelectedValue == "Select")
             {
                 check = false;
-                ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('Please enter a Reward Name')", true);
-                txtName.Focus();
-            }
-            if (txtDescription.Text == "")
-            {
-                check = false;
-                ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('Please enter a Reward Description')", true);
-                txtDescription.Focus();
-            }
-            if (txtPrice.Text == "")
-            {
-                check = false;
-                ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('Please enter a Reward Price')", true);
-                txtPrice.Focus();
-            }
-            if (txtStartDate.Text == "")
-            {
-                check = false;
-                ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('Please enter a Reward Start Date')", true);
-                txtStartDate.Focus();
-            }
-            if (txtEndDate.Text == "")
-            {
-                check = false;
-                ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('Please enter a Reward End Date')", true);
-                txtEndDate.Focus();
-            }
-            if (txtQuantity.Text == "")
-            {
-                check = false;
-                ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('Please enter a Reward Quantity')", true);
-                txtQuantity.Focus();
+                lblError.Visible = true;
+                lblErrorCategory.Visible = true;
+                lblError.Text = "*Please select a Reward Category";
+                txtCategory.Focus();
             }
             if (txtProvider.SelectedValue == "Select")
             {
                 check = false;
-                ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('Please select a Reward Provider')", true);
+                lblError.Visible = true;
+                lblErrorProvider.Visible = true;
+                lblError.Text = "*Please select a Reward Provider";
                 txtProvider.Focus();
             }
-            if (txtCategory.SelectedValue == "Select")
+            if (txtQuantity.Text == "")
             {
                 check = false;
-                ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('Please select a Reward Category')", true);
-                txtCategory.Focus();
+                lblError.Visible = true;
+                lblErrorQuantity.Visible = true;
+                lblError.Text = "*Please enter a Reward Quantity";
+                txtQuantity.Focus();
+            }
+            if (txtEndDate.Text == "")
+            {
+                check = false;
+                lblError.Visible = true;
+                lblErrorEnd.Visible = true;
+                lblError.Text = "*Please enter a valid Reward End Date";
+                txtEndDate.Focus();
+            }
+            if (txtStartDate.Text == "")
+            {
+                check = false;
+                lblError.Visible = true;
+                lblErrorStart.Visible = true;
+                lblError.Text = "*Please enter a valid Reward Start Date";
+                txtStartDate.Focus();
+            }
+            if (txtPrice.Text == "")
+            {
+                check = false;
+                lblError.Visible = true;
+                lblErrorPrice.Visible = true;
+                lblError.Text = "*Please enter a Reward Price";
+                txtPrice.Focus();
+            }
+            if (txtDescription.Text == "")
+            {
+                check = false;
+                lblError.Visible = true;
+                lblErrorDescription.Visible = true;
+                lblError.Text = "*Please enter a Reward Description";
+                txtDescription.Focus();
+            }
+            if (txtName.Text == "")
+            {
+                check = false;
+                lblError.Visible = true;
+                lblErrorName.Visible = true;
+                lblError.Text = "*Please enter a Reward Name";
+                txtName.Focus();
+            }
+
+            if (txtStartDate.Text != "")
+            {
+                if (checkDate(txtStartDate.Text))
+                {
+                    
+                }
+                else
+                {
+                    check = false;
+                    lblError.Visible = true;
+                    lblErrorName.Visible = true;
+                    lblError.Text = "Please enter a valid start date.";
+                }
+            }
+
+
+            if (txtEndDate.Text != "")
+            {
+                if (checkDate(txtEndDate.Text))
+                {
+                    if (checkDate(txtStartDate.Text))
+                    {
+                        if (!(DateTime.Parse(txtEndDate.Text) <= DateTime.Now))
+                        {
+                            if (!(DateTime.Parse(txtStartDate.Text) >= DateTime.Parse(txtEndDate.Text)))
+                            {
+
+                            }
+                            else
+                            {
+                                check = false;
+                                lblError.Visible = true;
+                                lblErrorName.Visible = true;
+                                lblError.Text = "The start date must be before the end date.";
+                            }
+                        }
+                        else
+                        {
+                            check = false;
+                            lblError.Visible = true;
+                            lblErrorName.Visible = true;
+                            lblError.Text = "The end date must be some date in the future.";
+                        }
+                    }
+                    else
+                    {
+                        check = false;
+                        lblError.Visible = true;
+                        lblErrorName.Visible = true;
+                        lblError.Text = "Please enter a valid value for start date.";
+                    }
+                }
+                else
+                {
+                    check = false;
+                    lblError.Visible = true;
+                    lblErrorName.Visible = true;
+                    lblError.Text = "Please enter a valid value for end date.";
+                }
+            }
+            else
+            {
+                check = false;
+                lblError.Visible = true;
+                lblErrorName.Visible = true;
+                lblError.Text = "Please enter a date.";
             }
 
             if (check)
             {
                 //calls the method to send it to the database
                 sendItem();
+                lblError.Visible = true;
+                lblError.Text = "Reward added successfully!";
             }
+
+
+
+
+
+
+
+
+
+
         }
         catch (Exception)
         {
             ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('Reward was not successfully added. Please ensure all fields are valid')", true);
         }
-
     }
 
     public void createItem()
     {
         String name = txtName.Text;
         String description = txtDescription.Text;
-        String price = txtPrice.Text;
+        Decimal price = Decimal.Parse(txtPrice.Text);
         DateTime start = Convert.ToDateTime(txtStartDate.Text);
         DateTime end = Convert.ToDateTime(txtEndDate.Text);
-        String quantity = txtQuantity.Text;
+        int quantity = int.Parse(txtQuantity.Text);
         DateTime updated = DateTime.Now;
         String updatedBy = user.FirstName + " " + user.LastName;
         item = new RewardItem(name, description, price, start, end, quantity, updated, updatedBy);
         //Label9.Text += item.Name + " " + item.Description + " " + item.Price + " " + item.StartDate + " " + item.EndDate + " " + item.Quantity + " " + item.LastUpdated + " " + item.LastUpdatedBy + "<br/>";
     }
-
+     
     public void sendItem()
     {
         try
@@ -247,9 +343,49 @@ public partial class AdminRewards : System.Web.UI.Page
         txtDescription.Text = String.Empty;
         txtPrice.Text = String.Empty;
         txtQuantity.Text = String.Empty;
-        txtStartDate.Text = "mm/dd/yyyy";
-        txtEndDate.Text = "mm/dd/yyyy";
+        txtStartDate.Text = String.Empty;
+        txtEndDate.Text = String.Empty;
         txtProvider.ClearSelection();
         txtCategory.ClearSelection();
+    }
+
+
+    protected Boolean checkDate(string date)
+    {
+        try
+        {
+            DateTime.Parse(date);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    protected Boolean checkInt(string num)
+    {
+        try
+        {
+            int.Parse(num);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    protected Boolean checkDecimal(string dec)
+    {
+        try
+        {
+            Decimal.Parse(dec);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 }

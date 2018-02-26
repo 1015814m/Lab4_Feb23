@@ -92,10 +92,9 @@
         <h3 class="w3-padding-64"><b>Top 10<br>Solutions</b></h3>
       </div>
       <div class="w3-bar-block">
-        <a href="Admin.aspx" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Home</a>  
+        <a href="Admin.aspx" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Analytics</a>  
         <a href="AdminRewards.aspx" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Add Rewards</a> 
-        <a href="AdminCreate.aspx" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Create/Edit Users</a> 
-        <a href="AdminAnalytics.aspx" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">View Analytics</a>  
+        <a href="AdminCreate.aspx" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Create/Edit Users</a>   
         <a href="AdminAddFunds.aspx" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Add Funds</a>
         <a href="Logout.aspx" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Logout</a>
       </div>
@@ -158,10 +157,10 @@
                          <asp:BoundField DataField="FirstName" HeaderText="FirstName" SortExpression="FirstName" />
                          <asp:BoundField DataField="LastName" HeaderText="LastName" SortExpression="LastName" />
                          <asp:BoundField DataField="Email" HeaderText="Email" SortExpression="Email" />
-                         <asp:BoundField DataField="Points" HeaderText="Points" SortExpression="Points" />
+                         <asp:BoundField DataField="Points" ReadOnly="true" HeaderText="Points" SortExpression="Points" />
                      </Columns>
                  </asp:GridView>
-                 <asp:SqlDataSource ID="SqlDataSource" runat="server" ConnectionString="<%$ ConnectionStrings:Lab4ConnectionString %>" SelectCommand="SELECT [EmployeeID], [FirstName], [LastName], [Email], [Points] FROM [Employee]"></asp:SqlDataSource>
+                 <asp:SqlDataSource ID="SqlDataSource" runat="server" ConnectionString="<%$ ConnectionStrings:Lab4ConnectionString %>" SelectCommand="SELECT [EmployeeID], [FirstName], [LastName], [Email], FORMAT([Points],'N2') as Points FROM [Employee]"></asp:SqlDataSource>
 
 
                  <asp:Label ID="lblEditFirstName" runat="server" Text="First Name: " Visible="false"></asp:Label>

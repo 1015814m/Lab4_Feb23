@@ -37,6 +37,9 @@
             width: 100px;
             
         }
+        .table{
+            font-size:x-large;
+        }
         .button {
             background-color: #4CAF50;
             color: white;
@@ -96,34 +99,58 @@
 
     <div class="w3-container" id="administration" style="margin-top: 75px;">
         <form id="feed" runat="server">
+             <asp:Label runat="server" ID="CurrentAdminPoints" Text="Current Admin Points:" Font-Bold="True" Font-Underline="True" CssClass="table"></asp:Label>
              
-            <asp:Label ID="AccountHeader" runat="server" Text="Please Enter Account Information Below" Font-Bold="True" Font-Underline="True"></asp:Label>
-            <br /><br />
-            <label>Name on Card:</label>
-            <input id="Name" runat="server" type="text" required=""/>
-            <div class="row"> 
-            <div class="column">
-            <label>Card Number:</label>
-            <input id="CardNumber" runat="server" type="text" required=""/>
-            </div>
-            <div class="column">
-            <label>Amount to Deposit:</label>
-            <input id="amount" runat="server" type="text"/>
-            </div>
-            </div>
-            <div class="row">
-            <div class="column">
-            <label>Expiration Date:</label>
-            <br />
-            <asp:DropDownList ID="Month" runat="server" CssClass="ddl"></asp:DropDownList>
-            <asp:DropDownList ID="Year" runat="server" CssClass="ddl"></asp:DropDownList>
-            </div>
-            <div class="column">
-            <label>CVV (3 Digits)</label>
-            <input id="CVV" runat="server" type="text" required=""/>
-            </div>
-            </div>
-            <asp:Button ID="SubmitMoney" runat="server" Text="Submit" OnClick="SubmitMoney_Click" CssClass="button" />
+            <table class="table"> 
+                 <tr>
+                     <td>
+                         <asp:Label ID="CurrentFunds" Text="&#9899Current Funds:" runat="server"></asp:Label> 
+                     </td>
+                     <td>
+                         <asp:Label ID="lblCurrenFundsNum" Text="" runat="server"></asp:Label>
+                     </td>
+                 </tr>
+                 
+                 <tr>
+                     <td>
+                         <asp:Label ID="TotalPoints" Text="&#9899Total Points Earned <br/>By Employees:" runat="server"></asp:Label>
+                     </td>
+                     <td>
+                         <asp:Label ID="lblTotalPoints" Text="" runat="server"></asp:Label>
+                     </td>
+                 </tr>
+                
+                 <tr>
+                     <td>
+                         <asp:Label ID="RemainingFunds" Text="&#9899Remaining Funds:" runat="server"></asp:Label>
+                     </td>
+                     <td>
+                         <asp:Label ID="lblRemainingFunds" Text="" runat="server"></asp:Label>
+                     </td>
+                 </tr>
+              </table>
+                
+              <br />
+              <asp:Label ID="WithdrawFrom" Text="Withdraw From:" runat="server"></asp:Label>
+              <br />
+              <asp:TextBox ID="txtWithdrawFrom" runat="server"></asp:TextBox>
+              <br />
+              <asp:Label ID="depositTo" Text="Deposit To:" runat="server"></asp:Label>
+              <br />
+              <asp:TextBox ID="txtDepositTo" runat="server"></asp:TextBox>
+              <br />
+              <asp:Label ID="Amount" Text="Amount:" runat="server"></asp:Label>
+              <br />
+              <asp:TextBox ID="txtAmount" runat="server"></asp:TextBox>
+              <br />
+              <asp:Button ID="btnSubmitAddFunds" runat="server" Text="Submit" OnClick="SubmitFunds_OnClick" CssClass="button" />
+
+              
+ 
+            
+
+
+
 
 
         </form>

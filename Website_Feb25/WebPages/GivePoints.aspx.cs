@@ -44,12 +44,12 @@ public partial class GivePoints : System.Web.UI.Page
 
         if (DropDownApplaud.SelectedIndex > 0)
         {
-            valueIndex = DropDownApplaud.SelectedIndex;
+            applaudIndex = DropDownApplaud.SelectedIndex;
         }
 
         if (DropDownCompanyValue.SelectedIndex > 0)
         {
-            applaudIndex = DropDownCompanyValue.SelectedIndex;
+            valueIndex = DropDownCompanyValue.SelectedIndex;
         }
 
 
@@ -178,61 +178,101 @@ public partial class GivePoints : System.Web.UI.Page
 
     private void CommittToDBPoints()
     {
-
-        try
+        if (int.Parse(GVTeamMember.SelectedRow.Cells[1].Text) != findEmployeeID(user.EmpLoginID))
         {
-            SqlConnection conn = ProjectDB.connectToDB();
-            string commandText = "INSERT INTO [dbo].[Achievement] (Description, Date, PointsAmount, EmployeeID, ValueID, RecEmployee, ApplaudID) " +
-                "VALUES (@Description, @Date, @PointsAmount, @EmployeeID, @ValueID, @RecEmployee, @ApplaudID)";
-            System.Data.SqlClient.SqlCommand insert = new System.Data.SqlClient.SqlCommand(commandText, conn);
-
-            insert.Parameters.AddWithValue("@Description", txtDescription.Value);
-            insert.Parameters.AddWithValue("@Date", DateTime.Parse(txtDate.Value));
-            insert.Parameters.AddWithValue("@PointsAmount", pointIndex);
-            insert.Parameters.AddWithValue("@EmployeeID", findEmployeeID(user.EmpLoginID));
-            insert.Parameters.AddWithValue("@ValueID", valueIndex);
-            insert.Parameters.AddWithValue("@RecEmployee", int.Parse(GVTeamMember.SelectedRow.Cells[1].Text));
-            insert.Parameters.AddWithValue("@ApplaudID", applaudIndex);
-
-            insert.ExecuteNonQuery();
-
-            achv = new Achievement(findMax(), txtDescription.Value, DateTime.Parse(txtDate.Value), pointIndex, findEmployeeID(user.EmpLoginID), valueIndex, int.Parse(GVTeamMember.SelectedRow.Cells[1].Text), applaudIndex);
-
-            insertFeed(achv);
-
-            Label.Text += insert.CommandText;
-            conn.Close();
-
-            SqlConnection add = ProjectDB.connectToDB();
-            string addPoints = "SELECT TOP 1 Points FROM [dbo].[Employee] WHERE EmployeeID = @RecEmployee";
-            System.Data.SqlClient.SqlCommand select = new System.Data.SqlClient.SqlCommand(addPoints, add);
-            select.Parameters.AddWithValue("@RecEmployee", int.Parse(GVTeamMember.SelectedRow.Cells[1].Text));
-
-            SqlDataReader reader = select.ExecuteReader();
-            Decimal points = 0;
-            if (reader.HasRows)
+            if(int.Parse(GVTeamMember.SelectedRow.Cells[1].Text) != -1)
             {
-                reader.Read();
-                points = (Decimal)reader["Points"];
+                if(checkDate(txtDate.Value))
+                {
+                    if(DateTime.Parse(txtDate.Value) <= DateTime.Now)
+                    {
+                        if(valueIndex != 0)
+                        {
+                            if(applaudIndex != 0)
+                            {
+                                try
+                                {
+                                    SqlConnection conn = ProjectDB.connectToDB();
+                                    string commandText = "INSERT INTO [dbo].[Achievement] (Description, Date, PointsAmount, EmployeeID, ValueID, RecEmployee, ApplaudID) " +
+                                        "VALUES (@Description, @Date, @PointsAmount, @EmployeeID, @ValueID, @RecEmployee, @ApplaudID)";
+                                    System.Data.SqlClient.SqlCommand insert = new System.Data.SqlClient.SqlCommand(commandText, conn);
+
+                                    insert.Parameters.AddWithValue("@Description", txtDescription.Value);
+                                    insert.Parameters.AddWithValue("@Date", DateTime.Parse(txtDate.Value));
+                                    insert.Parameters.AddWithValue("@PointsAmount", pointIndex);
+                                    insert.Parameters.AddWithValue("@EmployeeID", findEmployeeID(user.EmpLoginID));
+                                    insert.Parameters.AddWithValue("@ValueID", valueIndex);
+                                    insert.Parameters.AddWithValue("@RecEmployee", int.Parse(GVTeamMember.SelectedRow.Cells[1].Text));
+                                    insert.Parameters.AddWithValue("@ApplaudID", applaudIndex);
+
+                                    insert.ExecuteNonQuery();
+
+                                    achv = new Achievement(findMax(), txtDescription.Value, DateTime.Parse(txtDate.Value), pointIndex, findEmployeeID(user.EmpLoginID), valueIndex, int.Parse(GVTeamMember.SelectedRow.Cells[1].Text), applaudIndex);
+
+                                    insertFeed(achv);
+
+                                    Label.Text += insert.CommandText;
+                                    conn.Close();
+
+                                    SqlConnection add = ProjectDB.connectToDB();
+                                    string addPoints = "SELECT TOP 1 Points FROM [dbo].[Employee] WHERE EmployeeID = @RecEmployee";
+                                    System.Data.SqlClient.SqlCommand select = new System.Data.SqlClient.SqlCommand(addPoints, add);
+                                    select.Parameters.AddWithValue("@RecEmployee", int.Parse(GVTeamMember.SelectedRow.Cells[1].Text));
+
+                                    SqlDataReader reader = select.ExecuteReader();
+                                    Decimal points = 0;
+                                    if (reader.HasRows)
+                                    {
+                                        reader.Read();
+                                        points = (Decimal)reader["Points"];
+                                    }
+                                    add.Close();
+
+                                    SqlConnection addTo = ProjectDB.connectToDB();
+                                    string addToTable = "UPDATE [dbo].[Employee] SET Points = @PointTotal + @PointAdded WHERE EmployeeID = @RecEmployee";
+                                    System.Data.SqlClient.SqlCommand update = new System.Data.SqlClient.SqlCommand(addToTable, addTo);
+                                    update.Parameters.AddWithValue("@PointTotal", points);
+                                    update.Parameters.AddWithValue("@PointAdded", pointIndex);
+                                    update.Parameters.AddWithValue("@RecEmployee", int.Parse(GVTeamMember.SelectedRow.Cells[1].Text));
+                                    update.ExecuteNonQuery();
+                                    addTo.Close();
+
+                                }
+                                catch (Exception ea)
+                                {
+                                    Label.Text += ea.Message + valueIndex;
+
+                                }
+                            }
+                            else
+                            {
+                                Error.Text = "Please ensure all selections.";
+                            }
+                        }
+                        else
+                        {
+                            Error.Text = "Please ensure all selections";
+                        }
+                    }
+                    else
+                    {
+                        Error.Text = "The date cannot be a date in the future.";
+                    }
+                }
+                else
+                {
+                    Error.Text = "The date entered is not valid.";
+                }
             }
-            add.Close();
-
-            SqlConnection addTo = ProjectDB.connectToDB();
-            string addToTable = "UPDATE [dbo].[Employee] SET Points = @PointTotal + @PointAdded WHERE EmployeeID = @RecEmployee";
-            System.Data.SqlClient.SqlCommand update = new System.Data.SqlClient.SqlCommand(addToTable, addTo);
-            update.Parameters.AddWithValue("@PointTotal", points);
-            update.Parameters.AddWithValue("@PointAdded", pointIndex);
-            update.Parameters.AddWithValue("@RecEmployee", int.Parse(GVTeamMember.SelectedRow.Cells[1].Text));
-            update.ExecuteNonQuery();
-            addTo.Close();
-
-
-
+            else
+            {
+                Error.Text = "Please select a Team Member to reward.";
+            }
+            
         }
-        catch (Exception ea)
+        else
         {
-            Label.Text += ea.Message + valueIndex;
-
+            Error.Text = "You cannot reward yourself.";
         }
 
     }
@@ -314,6 +354,19 @@ public partial class GivePoints : System.Web.UI.Page
         catch (Exception ex)
         {
             Error.Text += "Error inserting into the feed information." + ex;
+        }
+    }
+
+    protected Boolean checkDate(string date)
+    {
+        try
+        {
+            DateTime.Parse(date);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
         }
     }
 }

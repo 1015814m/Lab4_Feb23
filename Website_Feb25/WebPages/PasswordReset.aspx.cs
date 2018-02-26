@@ -185,10 +185,11 @@ public partial class PasswordReset : System.Web.UI.Page
                     {
                         if(newPassOne == newPassTwo)
                         {
-                            commandText = "UPDATE [dbo].[EmployeeLogin] SET [PasswordHash] = @PasswordHash";
+                            commandText = "UPDATE [dbo].[EmployeeLogin] SET [PasswordHash] = @PasswordHash WHERE [UserName] = @UserName";
                             SqlCommand update = new SqlCommand(commandText, conn);
 
                             update.Parameters.AddWithValue("@PasswordHash", SimpleHash.ComputeHash(txtPassNewOne.Text, "MD5", null));
+                            update.Parameters.AddWithValue("@UserName", txtUserChange.Text);
 
                             update.ExecuteNonQuery();
                         }

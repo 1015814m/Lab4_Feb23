@@ -8,17 +8,19 @@ using System.Web;
 /// </summary>
 public class RewardItem
 {
-    private String rewardID;
+    private int rewardID;
     private String name;
     private String description;
-    private String price;
+    private Decimal price;
     private DateTime startDate;
     private DateTime endDate;
-    private String quantity;
+    private int quantity;
     private DateTime lastUpdated;
     private String lastUpdatedBy;
+    private int providerID;
+    private int categoryID;
 
-    public RewardItem(String name, String description, String price, DateTime startDate, DateTime endDate, String quantity, DateTime lastUpdated, String lastUpdatedBy)
+    public RewardItem(String name, String description, Decimal price, DateTime startDate, DateTime endDate, int quantity, DateTime lastUpdated, String lastUpdatedBy)
     {
         Name = name;
         Description = description;
@@ -29,7 +31,36 @@ public class RewardItem
         LastUpdated = lastUpdated;
         LastUpdatedBy = lastUpdatedBy;
     }
-    public String RewardID
+
+    public RewardItem(int rewardID,String name, String description, Decimal price, DateTime startDate, DateTime endDate, int quantity, DateTime lastUpdated, String lastUpdatedBy)
+    {
+        RewardID = rewardID;
+        Name = name;
+        Description = description;
+        Price = price;
+        StartDate = startDate;
+        EndDate = endDate;
+        Quantity = quantity;
+        LastUpdated = lastUpdated;
+        LastUpdatedBy = lastUpdatedBy;
+    }
+
+    public RewardItem(int rewardID, String name, String description, Decimal price, DateTime startDate, DateTime endDate, int quantity, int providerID, int categoryID)
+    {
+        RewardID = rewardID;
+        Name = name;
+        Description = description;
+        Price = price;
+        StartDate = startDate;
+        EndDate = endDate;
+        Quantity = quantity;
+        ProviderID = providerID;
+        CategoryID = categoryID;
+    }
+
+    
+
+    public int RewardID
     {
         get
         {
@@ -62,7 +93,7 @@ public class RewardItem
             description = value;
         }
     }
-    public String Price
+    public Decimal Price
     {
         get
         {
@@ -95,7 +126,7 @@ public class RewardItem
             endDate = value;
         }
     }
-    public String Quantity
+    public int Quantity
     {
         get
         {
@@ -128,4 +159,29 @@ public class RewardItem
             lastUpdatedBy = value;
         }
     }
+
+    public int ProviderID
+    {
+        get
+        {
+            return providerID;
+        }
+        private set
+        {
+            providerID = value;
+        }
+    }
+    public int CategoryID
+    {
+        get
+        {
+            return categoryID;
+        }
+        private set
+        {
+            categoryID = value;
+        }
+    }
+
+
 }

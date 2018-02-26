@@ -72,25 +72,22 @@
       <!-- Header -->
       <div class="w3-container" style="margin-top:80px" id="showcase">
         <h1 class="w3-jumbo"><b>View Rewards</b></h1>
-        <h1 class="w3-xxxlarge w3-text-red"><b>Pick Reward:</b></h1>
-        <hr style="width:50px;border:5px solid red; float: left;" class="w3-round">
+        
       </div>
 
     <div class="w3-container" id="viewreward" style="margin-top: 75px;">
         <form id="feed" runat="server">
+            
+            
+            <h3 class="w3-xlarge w3-text-red"><asp:Label ID="lblPoints" runat="server" Text=""></asp:Label></h3>
+            <hr style="width:50px;border:5px solid red; float: left;" class="w3-round">
+
+            <asp:Label ID="lblSuccess" runat="server" Text=""></asp:Label>
+
             <asp:TextBox ID="txtSearch" runat="server"></asp:TextBox>
-            <asp:Label ID="lblRadioButtons" runat="server" Text="Search by:"></asp:Label>
-            <asp:RadioButton ID="rdoName" runat="server" GroupName="check" Text="Reward Name" ValidationGroup="1" />
-            <asp:RadioButton ID="rdoCompany" runat="server" GroupName="check" Text="Reward Provider" ValidationGroup="1" />
-            <asp:Button ID="btnSearch" runat="server" Text="Search" OnClick="btnSearch_Click" />
-            <asp:Button ID="btnElligable" runat="server" Text="Display Elligable Rewards" OnClick="btnElligable_Click" />
-            <br/><br />
-            <asp:ListBox ID="lstRewardsView" runat="server" Width="300px"></asp:ListBox>
+
+            <asp:Label ID="errorMessage" runat="server" Text=""></asp:Label>
             <br />
-            <asp:ListBox CssClass="ddl" ID="lstElligable" runat="server"></asp:ListBox>
-            <asp:ListBox CssClass="ddl" ID="lstSearchName" runat="server"></asp:ListBox>
-            <asp:ListBox CssClass="ddl" ID="lstSearchProvider" runat="server"></asp:ListBox>
-            <asp:Button ID="btnSelect" runat="server" OnClick="btnSelect_Click" Text="Select" OnClientClick="return confirm('Are you sure?');" />
             <br />
         </form>
     </div>
