@@ -1,0 +1,61 @@
+link for artful Dodger picture
+https://s3.amazonaws.com/484imagescourtney/art.jpeg
+
+link for the Yello Button picture
+https://s3.amazonaws.com/484imagescourtney/boutique.jpeg
+
+jack browns picture
+https://s3.amazonaws.com/484imagescourtney/burger.jpeg
+
+Lurray Caverns
+https://s3.amazonaws.com/484imagescourtney/cave.jpeg
+
+Clementines
+https://s3.amazonaws.com/484imagescourtney/dinner.jpeg
+
+Bennys
+https://s3.amazonaws.com/484imagescourtney/pizza.jpeg
+
+Amazon
+https://s3.amazonaws.com/484imagescourtney/shopping.jpg
+
+massanutten
+https://s3.amazonaws.com/484imagescourtney/ski.jpeg
+
+Spa
+https://s3.amazonaws.com/484imagescourtney/spa.jpg
+
+planet fitness
+https://s3.amazonaws.com/484imagescourtney/workout.jpeg
+
+DEFAULT (trophy)
+https://s3.amazonaws.com/484imagescourtney/default.jpg
+
+
+
+
+RewardItem insert statements
+-------------------------------------------------------
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Jack Browns $25 Gift Card','$25 Gift Card','25','2018-01-01','2018-04-01','4','Andrea Derflinger','2018-01-01','1','4');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Massanutten $100 Gift Card','$100 Gift Card','80','2018-01-01','2018-04-01','10','Courtney Siffert','2018-01-01','2','1');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Tour for Two','Underground Adventure','50','2018-01-01','2018-04-01','15','Courtney Siffert','2018-01-01','3','1');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Amazon $10 Gift Card','$10 Gift Card','10','2018-01-01','2018-04-01','50','Courtney Siffert','2018-01-01','4','3');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('1 Slice of Bennys pizza','Its pizza as big as your face!','5','2018-01-01','2018-04-01','100','Courtney Siffert','2018-01-01','5','4');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Planet Fitness 1 month trial','Free membership','50','2018-01-01','2018-04-01','20','Courtney Siffert','2018-01-01','6','2');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Clementines Dinner','2 entrees and 1 dessert included','30','2018-01-01','2018-04-01','20','Sean Marley','2018-01-01','7','4');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Lush Spa Day Pass','Platinum level spa package','25','2018-01-01','2018-04-01','25','Sean Marley','2018-01-01','8','2');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('The Yellow Button $50 Gift Card','Gift Card to a high end boutique','30','2018-01-01','2018-04-01','10','Sean Marley','2018-01-01','10','3');
+INSERT INTO [dbo].[RewardItem] ([Name],[Description],[Price],[StartDate],[EndDate],[Quantity],[LastUpdatedBy],[LastUpdated],[ProviderID],[CategoryID]) VALUES ('Artful Dodger $20 Gift Card','unique dining experience in downtown Harrisonburg','10','2018-01-01','2018-04-01','30','Sean Marley','2018-01-01','11','4');
+
+Image insert statements
+-------------------------------------------------------------
+INSERT INTO [dbo].[Image] ([ImageFile],[EmployeeID],[RewardID]) VALUES ('https://s3.amazonaws.com/484imagescourtney/burger.jpeg',NULL,'1');
+INSERT INTO [dbo].[Image] ([ImageFile],[EmployeeID],[RewardID]) VALUES ('https://s3.amazonaws.com/484imagescourtney/ski.jpeg',NULL,'2');
+INSERT INTO [dbo].[Image] ([ImageFile],[EmployeeID],[RewardID]) VALUES ('https://s3.amazonaws.com/484imagescourtney/cave.jpeg',NULL,'3');
+INSERT INTO [dbo].[Image] ([ImageFile],[EmployeeID],[RewardID]) VALUES ('https://s3.amazonaws.com/484imagescourtney/shopping.jpg',NULL,'4');
+INSERT INTO [dbo].[Image] ([ImageFile],[EmployeeID],[RewardID]) VALUES ('https://s3.amazonaws.com/484imagescourtney/pizza.jpeg',NULL,'5');
+INSERT INTO [dbo].[Image] ([ImageFile],[EmployeeID],[RewardID]) VALUES ('https://s3.amazonaws.com/484imagescourtney/workout.jpeg',NULL,'6');
+INSERT INTO [dbo].[Image] ([ImageFile],[EmployeeID],[RewardID]) VALUES ('https://s3.amazonaws.com/484imagescourtney/dinner.jpeg',NULL,'7');
+INSERT INTO [dbo].[Image] ([ImageFile],[EmployeeID],[RewardID]) VALUES ('https://s3.amazonaws.com/484imagescourtney/spa.jpg',NULL,'8');
+INSERT INTO [dbo].[Image] ([ImageFile],[EmployeeID],[RewardID]) VALUES ('https://s3.amazonaws.com/484imagescourtney/boutique.jpeg',NULL,'9');
+INSERT INTO [dbo].[Image] ([ImageFile],[EmployeeID],[RewardID]) VALUES ('https://s3.amazonaws.com/484imagescourtney/art.jpeg',NULL,'12');
